@@ -1,0 +1,154 @@
+---
+name: Use Translator
+route: /use-translator
+---
+
+import { Header } from "../shared/Header"
+
+<Header repository="use-translator" />
+
+# Use Translator
+
+React integration for the [@corets/translator](/translator) package.
+
+```bash
+yarn add @corets/use-translator
+```
+
+## `useTranslator`
+
+Use translator inside components and re-render on language and translation changes:
+
+```tsx
+import React from "react"
+import { createTranslator } from "@corets/translator"
+import { useTranslator } from "@corets/use-translator"
+
+const translations = {
+  en: {
+    title: "Foo",
+    nested: { title: "Bar" }
+  }
+}
+const translator = createTranslator(translations, { language: "en" })
+
+const Example = () => {
+  const translator = useTranslator(translator)
+
+  return (
+    <div>Title: {translator.get("title")}</div>
+  )
+}
+```
+
+## `useTranslate`
+
+Use a translation function inside components and re-render on language and translation changes:
+
+```tsx
+import React from "react"
+import { createTranslator } from "@corets/translator"
+import { useTranslate } from "@corets/use-translator"
+
+const translations = {
+  en: {
+    title: "Foo",
+    nested: { title: "Bar" }
+  }
+}
+const translator = createTranslator(translations, { language: "en" })
+
+const Exymple = () => {
+  const t = useTranslate(translator)
+  const tt = useTranslate(translator, { "nested" })
+
+  return (
+    <div>
+      <div>Title: {t("title")}</div>
+      <div>Nested title: {tt("title")}, same as: {t("nested.title")}</div>
+    </div>
+  )
+}
+```
+
+## `useLanguage`
+
+Use languages related information inside your React component:
+
+```tsx
+import React from "react"
+import { createTranslator } from "@corets/translator"
+import { useLanguage } from "@corets/use-translator"
+
+const translations = {
+  en: {
+    title: "Foo",
+    nested: { title: "Bar" }
+  }
+}
+const translator = createTranslator(translations, { language: "en" })
+
+const Example = () => {
+  const language = useLanguage(translator)
+
+  return (
+    <div>
+      <div>Current: {language.current}</div>
+      <div>Fallback: {language.fallback}</div>
+      <div>Available: {JSON.stringify(language.available)}</div>
+      <button onClick={()=> language.set("de")}>Set language to "de"</button>
+    </div>
+  )
+}
+```
+
+## `TranslatorContext`
+
+You can share a translator instance through a dedicated `TranslatorContext`. Methods like `useTranslator`, `useTranslate` and `useLanguage` automatically try to find an instance in the context, so you don't have to extract it manually:
+
+```tsx
+import React ,{useContext}from "react"
+import { createTranslator } from "@corets/translator"
+import {
+  TranslatorContext,
+  useTranslator,
+  useTranslate,
+  useLanguage,
+} from "@corets/use-translator"
+
+const translations = {
+  en: {
+    title: "Foo",
+    nested: { title: "Bar" }
+  }
+}
+const translator = createTranslator(translations, { language: "en" })
+
+const ExampleProvider = () => {
+  return (
+    <TranslatorContext.Provider value={translator}>
+      <Example />
+    </TranslatorContext.Provider>
+  )
+}
+
+const Example = () => {
+  const translatorFromContext = useContext(TranslatorContext)
+  const alsoTranslatorFromContext = useTranslator()
+
+  const translateFunctionFromContext = useTranslate(translatorFromContext)
+  const alsoTranslateFunctionFromContext = useTranslate()
+
+  const languageFromContext = useLanguage(translatorFromContext)
+  const alsoLanguageFromContext = useLanguage()
+
+  const changeLanguage = () => languageFromContext.set("de")
+
+  return (
+    <div>
+      <h1>Title: {translateFunctionFromContext("title")}</h1>
+      <button onClick={changeLanguage}>Change language to "de"</button>
+    </div>
+  )
+}
+```

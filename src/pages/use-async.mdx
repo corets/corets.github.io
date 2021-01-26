@@ -1,0 +1,59 @@
+---
+name: Use Async
+route: /use-async
+---
+
+import { Header } from "../shared/Header"
+
+<Header repository="use-async" />
+
+# Use Async
+
+A convenient hook to deal with async operations inside React components.
+
+```bash
+yarn add @corets/use-async
+```
+
+## `useAsync`
+
+Function `useAsync` takes any other function that returns anything that can be *awaited* and returns its result as soon as the promise resolves. You also get some useful things like a `loading` indicator, the possible `error` that might have been thrown / or occurred through rejection and a `reload` function to rerun the async procedure. Async action can also be canceled with `cancel` or resolved directly using `resolve`.
+
+```tsx
+import React from "react"
+import { useAsync } from "@corets/use-async"
+
+const fetchCommodityPrice = (commodity: string) =>
+  new Promise<string>((resolve) =>
+    setTimeout(
+      () => resolve(`${commodity}: 1000$`),
+      3000
+    ))
+
+const Example = () => {
+  const handle = useAsync(() => fetchCommodityPrice("gold"), [])
+
+  if (handle.loading) {
+    return <span>Loading...</span>
+  }
+
+  if (handle.error) {
+    return <span>There was an error :(</span>
+  }
+
+  const handleReload = () => handle.reload()
+  const handleReloadWithOverride = () => handle.reload(() => fetchCommodityPrice("silver"))
+  const handleResolve = () => handle.resolve("Platinum: 99999$")
+  const handleCancel = () => handle.cancel()
+
+  return (
+    <div>
+      <span>{handle.result}</span>
+      <button onClick={handleReload}>reload</button>
+      <button onClick={handleReloadWithOverride}>override reload</button>
+      <button onClick={handleResolve}>resolve immediately</button>
+      <button onClick={handleCancel}>cancel</button>
+    </div>
+  )
+}
+```

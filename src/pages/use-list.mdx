@@ -1,0 +1,42 @@
+---
+name: Use List
+route: /use-list
+---
+
+import { Header } from "../shared/Header"
+
+<Header repository="use-list" />
+
+# Use List
+
+This package provides a React integration for [@corets/list](/list).
+
+```bash
+yarn add @corets/use-list
+```
+
+## `useList`
+
+Use observable lists inside React components:
+
+```tsx
+import React from "react"
+import { createList } from "@corets/list"
+import { useList } from "@corets/use-list"
+
+const globalList = createList(["apple", "oranges"])
+
+const Example = () => {
+  const list1 = useList(["apples", "oranges"])
+  const list2 = useList(() => createList(["apples", "oranges"]))
+  const list3 = useList(globalList)
+
+  const addItem = () => list1.add("tomatoes")
+
+  return (
+    <div>
+      <button onClick={addItem}>Items: {list1.get().join(",")}</button>
+    </div>
+  )
+}
+```

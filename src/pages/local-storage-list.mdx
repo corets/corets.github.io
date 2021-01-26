@@ -1,0 +1,49 @@
+---
+name: Local Storage List
+route: /local-storage-list
+---
+
+import { Header } from "../shared/Header"
+
+<Header repository="local-storage-list" />
+
+# Local Storage List
+
+Built on top of the [@corets/list](/list) package and provides an integration with `localStorage`. Can be used as a drop in replacement for lists from the other package.
+
+```bash
+yarn add @corets/local-storage-list
+```
+
+## React
+
+Example of how to use lists in React:
+
+```tsx
+import React from "react"
+import { createLocalStorageList } from "@corets/local-storage-list"
+import { useList } from "@corets/use-list"
+
+const Example = () => {
+  const list = useList(() => createLocalStorageList("storageKey", ["apple", "banana"]))
+
+  const addFruit = () => list.add("pineapple")
+
+  return (
+    <div>
+      Fruits: {list.get().join(",")}
+      <button onClick={addFruit}>Add fruit</button>
+    </div>
+  )
+}
+```
+
+## `createLocalStorageList`
+
+Create a new list:
+
+```ts
+import { createLocalStorageList } from "@corets/local-storage-list"
+
+const list = createLocalStorageList("storageKey", ["some", "data"])
+```

@@ -1,0 +1,168 @@
+---
+name: List
+route: /list
+---
+
+import { Header } from "../shared/Header"
+
+<Header repository="list" />
+
+# List
+
+Simple observable list that can also be used inside React using Hooks. This observable is accompanied by [@corets/value](/value) and [@corets/store](/store).
+
+```bash
+yarn add @corets/list
+```
+
+## React
+
+You can use lists inside React through this hooks based integration [@corets/use-list](/use-list).
+
+## LocalStorage
+
+There is also a version of this library that syncs its state to the localStorage: [@corets/local-storage-list](/local-storage-list)
+
+## `createList`
+
+Creates a new instance of `List`:
+
+```ts
+import { createList } from "@corets/list"
+
+const list = createList(["some", "data"])
+```
+
+Create a new instance without the factory function:
+
+```ts
+import { List } from "@corets/list"
+
+const list = new List(["some", "data"])
+```
+
+## `List.get`
+
+Retrieve all values from the list:
+
+```ts
+list.get()
+```
+
+## `List.getAt`
+
+Retrieve a value at a specific index:
+
+```ts
+list.getAt(0)
+```
+
+## `List.set`
+
+Replace all values in the list:
+
+```ts
+list.set(["mango", "potato"])
+```
+
+## `List.add`
+
+Add some data values without replacing the previous ones:
+
+```ts
+list.add("oranges", "beans")
+```
+
+## `List.addAt`
+
+Add value at a specific index:
+
+```ts
+list.addAt(1, "chili")
+```
+
+## `List.has`
+
+Check if a specific value is in the list:
+
+```ts
+list.has("oranges")
+```
+
+## `List.hasAt`
+
+Check if there is a value at the specific index:
+
+```ts
+list.hasAt(1)
+```
+
+## `List.remove`
+
+Remove a value from the list:
+
+```ts
+list.remove("beans")
+```
+
+## `List.removeAt`
+
+Remove value at the specific index:
+
+```ts
+list.removeAt(1)
+```
+
+## `List.indexOf`
+
+Get index of a specific value:
+
+```ts
+list.indexOf("oranges")
+```
+
+## `List.reset`
+
+Reset values to the initial state that has been provided during list creation:
+
+```ts
+list.reset()
+```
+
+You can also reset with a new state:
+
+```ts
+list.reset(["foo", "bar"])
+```
+
+## `List.filter`
+
+Filter values in the list:
+
+```ts
+list.filter((value, index) => true)
+```
+
+## `List.map`
+
+Map values in the list:
+
+```ts
+list.map((value, index) => newValue)
+```
+
+## `List.forEach`
+
+Iterate over values in the list:
+
+```ts
+list.forEach((value, index) => {})
+```
+
+## `List.listen`
+
+Listen to any changes:
+
+```ts
+list.listen(state => console.log(state))
+```

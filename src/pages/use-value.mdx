@@ -1,0 +1,38 @@
+---
+name: Use Value
+route: /use-value
+---
+
+import { Header } from "../shared/Header"
+
+<Header repository="use-value" />
+
+# Use Value
+
+This package provides a React integration for [@corets/value](/value).
+
+```bash
+yarn add @corets/use-value
+```
+
+## `useValue`
+
+Use observable values inside React components:
+
+```tsx
+import React from "react"
+import { createValue } from "@corets/value"
+import { useValue } from "@corets/use-value"
+
+const globalValue = createValue(0)
+
+const Example = () => {
+  const value1 = useValue(0)
+  const value2 = useValue(() => 0)
+  const value3 = useValue(globalValue)
+
+  const increment = () => value1.set(value1.get() + 1)
+
+  return <button onClick={increment}>Count: {value1.get()}</button>
+}
+```

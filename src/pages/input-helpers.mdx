@@ -1,0 +1,136 @@
+---
+name: Input Helpers
+route: /input-helpers
+---
+
+import { Header } from "../shared/Header"
+
+<Header repository="input-helpers" />
+
+# Input Helpers
+
+Various helpers related to input specific functionality.
+
+```bash
+yarn add @corets/input-helpers
+```
+
+## Select a file and send to server
+
+Submit file to server immediately after the selection:
+
+```tsx
+import React from "react"
+import { selectFile } from "@corets/input-helpers"
+import axios from "axios"
+
+const Example = () => {
+  const handleSelectFile = async () => {
+    const file = await selectFile()
+
+    if ( ! file) return
+
+    submitFile(file)
+  }
+
+  const submitFile = async (file: File) => {
+    const formData = new FormData()
+    formData.append('file', file)
+
+    await axios.post(`/endpoint`, formData, {
+      headers: { 'content-type': 'multipart/form-data' },
+    })
+  }
+
+  return <button onClick={handleSelectFile}/>
+}
+```
+
+## Select a file and show preview
+
+Show a file preview immediately after the selection:
+
+```tsx
+import React, { useState } from "react"
+import { selectFileOfType } from "@corets/input-helpers"
+
+const Example = () => {
+  const [selectedFile, setSelectedFile] = useState()
+
+  const handleSelectFileOfType = async () => {
+    const file = await selectFileOfType('image/*')
+
+    if ( ! file) return
+
+    setSelectedFile(file)
+  }
+
+  return (
+    <div>
+      <button onClick={handleSelectFileOfType}/>
+
+      {selectedFile && (
+        <img src={URL.createObjectURL(selectedFile)}/>
+      )}
+    </div>
+  )
+}
+```
+
+## `selectFile`
+
+Prompt user to select one file:
+
+```tsx
+import { selectFile } from "./selectFile"
+
+const file = await selectFile()
+
+if (file) {
+  // some something with the file...
+}
+```
+
+## `selectFiles`
+
+Prompt user to select multiple files:
+
+```tsx
+import { selectFiles } from "@corets/input-helpers"
+
+const files = await selectFiles()
+
+if (files.length > 0) {
+  // do something with the files...
+}
+```
+
+## `selectFileOfType`
+
+Prompt user to select a file of a specific type:
+
+```tsx
+import { selectFileOfType } from "@corets/input-helpers"
+
+const file = await selectFileOfType('image/*')
+
+if (file) {
+  // so something with the file
+}
+```
+
+**Note:** Read more about file types [here](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input/file#accept).
+
+## `selectFilesOfType`
+
+Prompt user to select multiple files of a specific type:
+
+```tsx
+import { selectFilesOfType } from "@corets/input-helpers"
+
+const files = await selectFilesOfType('image/*')
+
+if (files.length > 0) {
+  // so something with the files...
+}
+```

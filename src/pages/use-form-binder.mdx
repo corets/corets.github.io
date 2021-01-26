@@ -1,0 +1,58 @@
+---
+name: Use FormBinder
+route: /use-form-binder
+---
+
+import { Header } from "../shared/Header"
+
+<Header repository="use-form-builder" />
+
+# Use Form Binder
+
+Input binders for vanilla HTML input element for the [@corets/form](/form) package.
+
+```bash
+yarn add @corets/use-form-binder
+```
+
+## `useFormBinder`
+
+Create an input binder for vanilla HTML input elements:
+
+```tsx
+import React from "react"
+import { createForm } from "@corets/form"
+import { useForm } from "@corets/use-form"
+import { useFormBinder } from "@corets/use-form-binder"
+
+const Example = () => {
+  const form = useForm(() => createForm({
+    input: "text",
+    checkbox: true,
+    radio: "second",
+    select: "second",
+  }))
+
+  const bind = useFormBinder(form)
+
+  return (
+    <form { ...bind.form() }>
+      <input type="text" { ...bind.input("input") } />
+
+      <input type="checkbox" { ...bind.checkbox("checkbox") } />
+
+      <input type="radio" { ...bind.radio("radio", "first") } />
+      <input type="radio" { ...bind.radio("radio", "second") } />
+
+      <select { ...bind.select("select") }>
+        <option value="first">Option 1</option>
+        <option value="second">Option 2</option>
+        <option value="third">Option 3</option>
+      </select>
+
+      <button { ...bind.submit() }>Submit</button>
+    </form>
+  )
+}
+```
+

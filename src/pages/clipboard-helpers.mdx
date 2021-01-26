@@ -1,0 +1,38 @@
+---
+name: Clipboard Helpers
+route: /clipboard-helpers
+---
+
+import { Header } from "../shared/Header"
+
+<Header repository="clipboard-helpers" />
+
+# Clipboard  Helpers
+
+Various helpers related to clipboard specific functionality.
+
+```bash
+yarn add @corets/clipboard-helpers
+```
+
+## `copyToClipboard`
+
+Copy a value to clipboard:
+
+```ts
+import { copyToClipboard } from "@corets/clipboard-helpers"
+
+copyToClipboard("some value")
+```
+
+Behind the scenes, a hidden input element is rendered to perform the copy action. Sometimes you might want to specify a custom render target, for example when using a focus trap. You can do so like this:
+
+```ts
+import { copyToClipboard } from "@corets/clipboard-helpers"
+
+copyToClipboard("some value", "#target")
+
+// or
+
+copyToClipboard("some value", document.getElementById("target"))
+```

@@ -1,0 +1,48 @@
+---
+name: Local Storage Value
+route: /local-storage-value
+---
+
+import { Header } from "../shared/Header"
+
+<Header repository="local-storage-value" />
+
+# Local Storage Value
+
+Built on top of the [@corets/value](/value) package and provides an integration with `localStorage`. Can be used as a drop in replacement for values from the other package.
+
+```bash
+yarn add @corets/local-storage-value
+```
+
+## React
+
+Example of how to use values in React:
+
+```tsx
+import React from "react"
+import { createLocalStorageValue } from "@corets/local-storage-value"
+import { useValue } from "@corets/use-value"
+
+const Example = () => {
+  const counter = useValue(() => createLocalStorageValue("storageKey", 1))
+
+  const increment = () => counter.set(counter.get() + 1)
+
+  return (
+    <div>
+      <button onClick={increment}>{counter.get()}</button>
+    </div>
+  )
+}
+```
+
+## `createLocalStorageValue`
+
+Create a new value:
+
+```ts
+import { createLocalStorageValue } from "@corets/local-storage-value"
+
+const value = createLocalStorageValue("storageKey", "some data")
+```

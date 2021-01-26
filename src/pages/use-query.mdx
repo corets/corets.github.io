@@ -1,0 +1,44 @@
+---
+name: Use Query
+route: /use-query
+---
+
+import { Header } from "../shared/Header"
+
+<Header repository="use-query" />
+
+# Use Query
+
+Convenient hooks for url query segments, built for [`react-router`](https://reactrouter.com/web/guides/quick-start). Working with queries is now as easy as using `useState`.
+
+```bash
+yarn add @corets/use-query
+```
+
+## `useQuery`
+
+Hook into any query param you want, right inside your React component:
+
+```tsx
+import React from "react"
+import { useQuery } from "@corets/use-query"
+
+const Example = () => {
+  const [query, setQuery] = useQuery({
+    page: 1,
+    order: "asc"
+  })
+
+  const handleGoToNextPage = () => setQuery({ page: query.page + 1 })
+  const handleToggleSort = () => setQuery({ order: query.order === "asc" ? "desc" : "asc" })
+
+  return (
+    <div>
+      <div>Page: {query.page}</div>
+      <div>Order: {query.order}</div>
+      <button onClick={handleGoToNextPage}>Go to next page</button>
+      <button onClick={handleToggleSort}>Change sorting order</button>
+    </div>
+  )
+}
+```

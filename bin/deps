@@ -1,0 +1,102 @@
+#!/usr/bin/env node
+
+// parse all package.json files within given paths
+// and display a sorted list of packages based on
+// their dependency on each other, used mainly for transition
+// from @bytesoftio to @corets
+
+const fs = require("fs")
+const path = require("path")
+
+const run = async (argv) => {
+  const scanPaths = argv.length === 0 ? ["."] : argv
+  const debug = false
+  const cwd = process.cwd()
+
+  const resolvedScanPaths = scanPaths.map(scanPath => path.resolve(cwd, scanPath))
+
+  resolvedScanPaths.forEach((resolvedScanPath) => {
+    if (!fs.existsSync(resolvedScanPath)) {
+      console.error(`Invalid scan path "${ resolvedScanPath }"`)
+      process.exit(1)
+    }
+  })
+
+  const filePaths = resolvedScanPaths.map(resolvedScanPath => {
+    return fs.readdirSync(resolvedScanPath).map(file => path.resolve(resolvedScanPath, file))
+  }).flat()
+
+  const packagePaths = filePaths.filter(filePath => {
+    const isDir = fs.lstatSync(filePath)
+    const isModule = fs.existsSync(path.resolve(filePath, "package.json"))
+
+    return isDir && isModule
+  })
+
+  const packages = packagePaths.map(packagePath => {
+    const packageJsonPath = path.resolve(packagePath, "package.json")
+    const packageJson = require(packageJsonPath)
+
+    return {
+      packagePath,
+      packageJsonPath,
+      name: packageJson.name,
+    }
+  })
+
+  const packageNames = packages.map(info => info.name)
+
+  debug && console.log(`Found packages: \n${ packageNames.map(name => `    ${ name }`).join("\n") }`)
+
+  const additionalDependencies = ["lodash", "lodash-es"]
+
+  const packagesWithDeps = packages.map(info => {
+    const allDependencies = [...packageNames, ...additionalDependencies]
+
+    const packageJson = require(info.packageJsonPath)
+    const dependencies = findCommonDependencies(packageJson.dependencies || {}, allDependencies)
+    const devDependencies = findCommonDependencies(packageJson.devDependencies || {}, allDependencies)
+    const peerDependencies = findCommonDependencies(packageJson.peerDependencies || {}, allDependencies)
+    const commonDependencies = [...dependencies, ...devDependencies, ...peerDependencies]
+
+    return {
+      ...info,
+      commonDependencies,
+    }
+  }).sort((a, b) => a.commonDependencies.length - b.commonDependencies.length)
+
+  const tmpPackagesWithDeps = [...packagesWithDeps]
+  const sortedPackageNames = []
+
+  while (tmpPackagesWithDeps.length > 0) {
+    const firstPackage = tmpPackagesWithDeps.shift()
+
+    let putBack = firstPackage.commonDependencies.find(dependency => !sortedPackageNames.includes(dependency) && !additionalDependencies.includes(dependency))
+
+    if (putBack) {
+      tmpPackagesWithDeps.push(firstPackage)
+    } else {
+      sortedPackageNames.push(firstPackage.name)
+    }
+  }
+
+  const RESET = "\x1b[0m"
+  const DIM = "\x1b[2m"
+
+  sortedPackageNames.forEach(name => {
+    const info = packagesWithDeps.find(info => info.name === name)
+    console.log(`${ name }`)
+
+    info.commonDependencies.forEach((dependency, depIndex) => {
+      const depIsLast = info.commonDependencies.length - 1 === depIndex
+      const depPrefix = depIsLast ? "└──" : "├──"
+      console.log(`${ DIM }${ depPrefix } ${ dependency }${ RESET }`)
+    })
+  })
+}
+
+const findCommonDependencies = (dependencies, commonNames) => Object.keys(dependencies).filter(dependency => commonNames.includes(dependency))
+
+
+run(process.argv.slice(2))
+

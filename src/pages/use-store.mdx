@@ -1,0 +1,41 @@
+---
+name: Use Store
+route: /use-store
+---
+
+import { Header } from "../shared/Header"
+
+<Header repository="use-store" />
+
+# Use Store
+
+This package provides React integration for [@corets/store](/store).
+
+```bash
+yarn add @corets/use-store
+```
+
+## `useStore`
+
+Use observable stores inside React components:
+
+```tsx
+import React from "react"
+import { createStore } from "@corets/store"
+import { useStore } from "@corets/use-store"
+
+const globalStore = createStore({ count: 0 })
+
+const Example = () => {
+  const store1 = useStore(() => ({ count: 0 }))
+  const store2 = useStore(globalStore)
+
+  const increment = () => store1.set({ count: store1.get().count + 1 })
+
+  return (
+    <div>
+      <button onClick={increment}>Count: {store1.get().count}</button>
+    </div>
+  )
+}
+```

@@ -1,0 +1,2089 @@
+---
+name: Schema
+route: /schema
+---
+
+import { Header } from "../shared/Header"
+
+<Header repository="schema" />
+
+# Schema
+
+This library provides an easy and powerful way to describe, validate and sanitize things like objects, arrays, strings numbers, dates and so on. It can be used for complex validation scenarios as well as simple one-line assertions.
+
+You can mix and match these kinds of schemas: [`object`](#object), [`string`](#string), [`number`](#number), [`array`](#array), [`boolean`](#boolean), [`date`](#date) and [`mixed`](#mixed)
+
+There are two ways to run validations. For simple things like one-liners where you simply want to know if a value matches certain criteria, and get a `true` or `false` as result, you can use the [`Schema.test()`](#schematest) method. For proper validation, with error messages as result, you can use the [`validate()`](#schemavalidate) method.
+
+Every schema specialises on a specific data type and comes with various assertion and sanitization methods. Some methods you'll be able to find on every schema, others are exclusive to a specific kind of schema.
+
+Assertions are used for validation purposes to ensure that a value is valid.
+
+Sanitization methods are called before validation and are used to normalise the underlying values. For example, you can ensure that a string is capitalised and all object keys are camel-cased. Sanitization can help you reduce the number of validation errors by proactively fixing them in the first place. All sanitization methods start with the prefix `to`, for example: [`string.toTrimmed()`](#stringtotrimmed), [`string.toDefault()`](#stringtodefault).
+
+Feature overview:
+
+- **Works everywhere**, use it in React, React Native, Angular, Vue or NodeJs
+- **Tons of validation methods** for many kinds of inputs
+- **Many sanitization methods** for data normalization
+- Typed from tail to toe for **Amazing  developer experience**
+- Very **Intuitive API**
+- **Build any kind of schema you can think of**
+- Supports **Sync and Async** validation and sanitization
+- Encourages you to build **Reusable schemas**
+- **Combine multiple schemas** into more complex ones
+- **Combine schemas logically** through conditions
+- Add **Custom validation and sanitization** logic with ease
+- Easily **Override error messages** on the fly
+- Comes **Translated into 6 different languages**: English, German, French, Italian, Spanish and Russian
+- Very **Easy to add a new language**
+- Very **Easy to override translations**
+
+
+```bash
+yarn add @corets/schema
+```
+
+## Quick start
+
+Here is an example of all the available schemas and how to import them.
+
+```ts
+import { string, number, array, boolean, date, object, mixed } from "@corets/schema"
+```
+
+Let's describe a simple user object.
+
+- Property *email* must be of type string and a valid email address
+- Property *fullName* must be a string  between 3 and 100 characters
+- Property *roles* must be an array containing at least one role, valid roles are *admin*, *publisher* and *developer*, no duplicates are allowed
+- Property *tags* must be an array of strings, each at least 3 characters long and consisting of letter and dashes
+
+```ts
+import { array, object, string } from "@corets/schema"
+
+const userSchema = object({
+  email: string().email(),
+  fullName: string().min(3).max(100),
+  roles: array().min(1).someOf(["admin", "publisher", "developer"]).toUnique(),
+  tags: array(string().min(3).alphaDashes())
+})
+```
+
+The schema above contains some validation assertions as well as some sanitization logic.
+
+Quick check if an object is valid according to the schema:
+
+```ts
+const valid = userSchema.test({ /* ... */ })
+
+if (valid) {
+  // ...
+}
+```
+
+Get a detailed list of errors:
+
+```ts
+const errors = userSchema.validate({ /* ... */ })
+
+if ( ! errors) {
+  // ...
+}
+```
+
+The errors object would look something like this:
+
+```ts
+{
+  "field": ["first error", "second error"],
+  "nested.field": ["first error", "second error"],
+}
+```
+
+Run sanitizers like [`array.toUnique()`](#arraytounique):
+
+```ts
+const sanitizedValue = userSchema.sanitize({ /* ... */ })
+```
+
+Test, validated and sanitize at the same time:
+
+```ts
+const [valid, sanitizedValue] = userSchema.sanitizeAndTest({ /* ... */ })
+const [errors, sanitizedValue] = userSchema.sanitizeAndValidate({ /* ... */ })
+```
+
+## Combining schemas
+
+Schemas can be freely combined with one another. When describing arrays and objects you have no way around it.
+
+Here is an example of two schemas being combined:
+
+```ts
+import { array, string } from "@corets/schema"
+
+// a valid username is alpha numeric and has a length from 3 to 10 characters
+const usernameSchema = string().alphaNumeric().between(3, 10)
+
+// array contain at least 3 valid usernames
+const usernameListSchema = array(usernameSchema).min(3)
+
+const errors = usernameListSchema.validate(["foo", "bar", "baz"])
+```
+
+**Note:** Consider writing schemas that are reusable!
+
+## Conditional validations
+
+Schemas can be logically linked together using methods [`Schema.and()`](#schemaand), [`Schema.or()`](#schemaor) and [`Schema.also()`](#schemaalso). A [`Schema.and()`](#schemaand) relation will only be executed if the parent schema, that it is linked to, could validate successfully. A [`Schema.or()`](#schemaor) relation will only execute if the parent schema failed, the [`Schema.or()`](#schemaor) schema will be attempted instead. A [`Schema.also()`](#schemaalso) relation will execute regardless of the validation status of the parent schema.
+
+
+Example of a [`Schema.and()`](#schemaand) relation, this schema will first ensure that the value is a string, and only if the first validation passes, it will test if the value is a numeric string:
+
+```ts
+import { string } from "@corets/schema"
+
+string().and(string().numeric())
+```
+
+Example of a [`Schema.or()`](#schemaor) relation, this schema will first check if the value is a number, and only if it's not, it will test if that value is a numeric string:
+
+```ts
+import { number, string } from "@corets/schema"
+
+number().or(string().numeric())
+```
+
+Example of an [`Schema.also()`](#schemaalso) relation, this schema will execute both parts regardless of the validation outcome of the parent schema:
+
+```ts
+import { number, string } from "@corets/schema"
+
+// this validation will never pass!
+number().also(string().numeric())
+```
+
+Conditional schemas can be wrapped into a function, this allows you to define schemas dynamically during the validation:
+
+```ts
+import { string } from "@corets/schema"
+
+string().and(() => string().numeric())
+string().or(() => string().numeric())
+string().also(() => string().numeric())
+```
+
+**Note:** Given that schemas can be freely combined and defined at validation time, this means you can als do the same with sanitizers!
+
+## Custom validations
+
+Methods [`Schema.and()`](#schemaand), [`Schema.or()`](#schemaor) and [`Schema.also()`](#schemaalso) do not always have to return another schema. They can be used for your custom validations functions. A custom validation function can return either another schema, a validation result, or an error message.
+
+Example of a validation function returning an error message:
+
+```ts
+import { number } from "@corets/schema"
+
+const customValidation = (value: any) => value < 12 && "Must be bigger than 12"
+
+number().and(customValidation)
+number().or(customValidation)
+number().also(customValidation)
+```
+
+**Note:** You can also return multiple error messages.
+
+Example of a validation function returning a schema:
+
+```ts
+import { string } from "@corets/schema"
+
+const customValidation = (value: any) => value.includes("@") && string().email()
+
+string().and(customValidation)
+string().or(customValidation)
+string().also(customValidation)
+```
+
+Example of a validation function returning schema validation errors:
+
+```ts
+import { string } from "@corets/schema"
+
+const customValidation = (value: any) => value.includes("@") && string().email().verify(value)
+
+string().and(customValidation)
+string().or(customValidation)
+string().also(customValidation)
+```
+
+**Note:** In order to return schema errors, you have to use the method [`Schema.verify()`](#schemaverify) instead of [`Schema.validate()`](#schemavalidate), since it returns errors in a format that can be processed internally. Most of the time you should simply return the schema, instead of invoking it manually.
+
+## Custom sanitizers
+
+You can add a custom sanitizer with the method [`Schema.map()`](#schemamap).
+
+Here is an example of a sanitizer that converts everything to a string:
+
+```ts
+import { string } from "@corets/schema"
+
+const customSanitizer = (value: any) => value.toString()
+
+const sanitizedValue = string().map(customSanitizer).sanitize(1234)
+```
+
+## Translations
+
+This library uses the [@corets/translator](/translator) package for translations.
+
+You can change the default translator language like this:
+
+```ts
+import { schemaTranslator } from "@corets/schema"
+
+schemaTranslator.setLanguage("en")
+```
+
+You can also request a specific language during validation like this:
+
+```ts
+import { string } from "@corets/schema"
+
+string().validate("foo", { language: "ru", fallbackLanguage: "en" })
+string().verify("foo", { language: "ru", fallbackLanguage: "en" })
+string().sanitizeAndValidate("foo", { language: "ru", fallbackLanguage: "en" })
+string().sanitizeAndVerify("foo", { language: "ru", fallbackLanguage: "en" })
+```
+
+Get a full list of all translations:
+
+```ts
+import { schemaTranslator } from "@corets/schema"
+
+console.log(schemaTranslator.getTranslations())
+```
+
+**Note:** You can also find the whole list [here](https://github.com/corets/schema/tree/master/src/locales). For further examples on how to replace translations, add new languages and so on, please have a look at the [@corets/translator](/translator) docs.
+
+## `Schema.test`
+
+This method simply indicates whether a value is valid or not by returning a boolean.
+
+Example of a successful assertion:
+
+```ts
+import { string } from "@corets/schema"
+
+const schema = string().min(3).alphaNumeric()
+
+// true
+const valid = schema.test("fooBar")
+
+if (valid) {
+  // ...
+}
+```
+
+Example of a failed assertion:
+
+```ts
+import { string } from "@corets/schema"
+
+const schema = string().min(3).alphaNumeric()
+
+// false
+const valid = schema.test("foo-bar")
+
+if (valid) {
+  // ...
+}
+```
+
+## `Schema.validate`
+
+This method returns a validation result containing detailed error messages about why a value did not pass validation.
+
+Example of a successful validation:
+
+```ts
+import { string } from "@corets/schema"
+
+const schema = string().min(3).alphaNumeric()
+
+// undefined
+const errors = schema.validate("fooBar")
+
+if ( ! errors) {
+  // ...
+}
+```
+
+Example of a failed validation:
+
+```ts
+import { string } from "@corets/schema"
+
+const schema = string().min(3).alphaNumeric()
+
+// [ ... ]
+const errors = schema.validate("foo-bar")
+
+if ( ! errors) {
+  // ...
+}
+```
+
+This is what the validation result might look like:
+
+```ts
+{
+  "field": ["first error", "second error"],
+  "nested.field": ["first error", "second error"],
+}
+```
+
+**Note:** when validating anything but an object, you'll find the error messages under the key `self`.
+
+## `Schema.verify`
+
+This method works the same as [`Schema.validate()`](#schemavalidate), except it returns errors in a slightly different format. This format contains additional information about each error message and can be used for further processing of validation errors.
+
+Example of a failed validation:
+
+```ts
+import { string } from "@corets/schema"
+
+const errors = string().min(10).verify("foo")
+```
+
+Here is an example of how the error messages would look like:
+
+```ts
+[
+  {
+    // validation identifier, this value is also used as a translation key
+    // in case of a custom validation, this value is set to "custom"
+    "type": "string_min",
+    // translated error message, or the string that was
+    // return from a custom validation function
+    "message": "Must be at least \"2\" characters long",
+    // arguments that have been passed to the validation method
+    "args": [10],
+    // the actual value that was validated
+    "value": "foo",
+    // logical link in case of relation trough and(), or() and also()
+    "link": undefined,
+    // path to the validated property, if the validation has been called on an object
+    "path": undefined
+  }
+]
+```
+
+## `Schema.sanitize`
+
+This method applies sanitizers returns the sanitized value:
+
+```ts
+import { string } from "@corets/schema"
+
+const schema = string().toTrimmed().toCamelCase()
+
+// "fooBar"
+const value = schema.sanitize("  foo bar  ")
+```
+
+**Note:** All sanitization methods always start with the prefix `to`, for example: [`string.toTrimmed()`](#stringtotrimmed), [`string.toDefault()`](#stringtodefault).
+
+## `Schema.sanitizeAndTest`
+
+This method applies sanitizers on the underlying value and runs validation against the sanitized version. It returns a boolean indicating whether the value is valid, and the sanitized version of the value. Basically this calls the methods [`Schema.sanitize()`](#schemasanitize) and [`Schema.test()`](#schematest) sequentially.
+
+Example of a Successful test with sanitizers:
+
+```ts
+import { string } from "@corets/schema"
+
+const schema = string().min(4).toCamelCase()
+
+// [true, "fooBar"]
+const [valid, value] = schema.sanitizeAndTest("foo bar")
+```
+
+Example of a failed test with sanitizers:
+
+```ts
+import { string } from "@corets/schema"
+
+const schema = string().min(4).toTrimmed()
+
+// [false, "foo"]
+const [valid, value] = schema.sanitizeAndTest("  foo  ")
+```
+
+As you can see, even though the string `"  foo  "` has a length greater than `4`. During the sanitization, the string  gets trimmed, becomes`"foo"` and therefore the test will fail.
+
+**Note:** All sanitization methods always start with the prefix `to`, for example: [`string.toTrimmed()`](#stringtotrimmed), [`string.toDefault()`](#stringtodefault)
+
+## `Schema.sanitizeAndValidate`
+
+This method applies sanitizers on the underlying value and runs validation against the sanitized version. It returns a validation result containing detailed error messages about why a value did not pass validation, and the sanitized version of the value. Basically this calls the methods [`Schema.sanitize()`](#schemasanitize) and [`Schema.validate()`](#schemavalidate) sequentially.
+
+Example of a successful validation with sanitizers:
+
+```ts
+import { string } from "@corets/schema"
+
+const schema = string().min(4).toCamelCase()
+
+// [undefined, "fooBar"]
+const [errors, value] = schema.sanitizeAndValidate("foo bar")
+```
+
+Example of a failed validation with sanitizers:
+
+```ts
+import { string } from "@corets/schema"
+
+const schema = string().min(4).toTrimmed()
+
+// [{ ... }, "foo"]
+const [errors, value] = schema.sanitizeAndValidate("  foo  ")
+```
+
+This is what the errors would look like:
+
+```ts
+{
+  "self": ["Must be at least \"4\" characters long"],
+}
+```
+
+## `Schema.sanitizeAndVerify`
+
+This method works exactly the same as [`sanitizeAndValidate()`](#schemasanitizeandvalidate) except that it returns error messages in a different format with additional information. Take a look at [`sanitizeAndValidate()`](#schemasanitizeandvalidate) and [`verify()`](#schemaverify).
+
+**Note:** All sanitization methods always start with the prefix `to`, for example: [`string.toTrimmed()`](#stringtotrimmed), [`string.toDefault()`](#stringtodefault)
+
+## `Schema.testAsync`
+
+This is an async version of the [`Schema.test()`](#schematest) method, that allows you to use async validators on the schema.
+
+**Note:** This library has no async validation or sanitization methods itself, but you can add your own.
+
+## `Schema.validateAsync`
+
+This is an async version of the [`Schema.validate()`](#schemavalidate) method, that allows you to use async validators on the schema.
+
+**Note:** This library has no async validation or sanitization methods itself, but you can add your own.
+
+## `Schema.verifyAsync`
+
+This is an async version of the [`Schema.verify()`](#schemaverify) method, that allows you to use async validators on the schema.
+
+**Note:** This library has no async validation or sanitization methods itself, but you can add your own.
+
+## `Schema.sanitizeAsync`
+
+This is an async version of the [`Schema.sanitize()`](#schemasanitize) method, that allows you to use async sanitizers on the schema.
+
+**Note:** This library has no async validation or sanitization methods itself, but you can add your own.
+
+## `Schema.sanitizeAndTestAsync`
+
+This is an async version of the [`Schema.sanitizeAndTest()`](#schemasanitizeandtest) method, that allows you to use async validators and sanitizers on the schema.
+
+**Note:** This library has no async validation or sanitization methods itself, but you can add your own.
+
+## `Schema.sanitizeAndValidateAsync`
+
+This is an async version of the [`Schema.sanitizeAndValidate()`](#schemasanitizeandvalidate) method, that allows you to use async validators and sanitizers on the schema.
+
+**Note:** This library has no async validation or sanitization methods itself, but you can add your own.
+
+## `Schema.sanitizeAndVerifyAsync`
+
+This is an async version of the [`Schema.sanitizeAndVerify()`](#schemasanitizeandverify) method, that allows you to use async validators and sanitizers on the schema.
+
+**Note:** This library has no async validation or sanitization methods itself, but you can add your own.
+
+## `Schema.also`
+
+Connects multiple schemas or attaches a custom validation function to the schema. Have a look at [custom validations](#custom-validations) for more details.
+
+## `Schema.and`
+
+Logically connects multiple schemas, or a custom validation function to the schema. Have a look at [conditional validations](#conditional-validations) and [custom validations](#custom-validations) for more details.
+
+## `Schema.or`
+
+Logically connects multiple schemas, or a custom validation function to the schema. Have a look at [conditional validations](#conditional-validations) and [custom validations](#custom-validations) for more details.
+
+## `Schema.map`
+
+Attaches a custom sanitizer function to the schema. Have a look at [custom sanitizers](#custom-sanitizers) for more details.
+
+## `value`
+
+This schema is different from the others since it does not provide any validation nor sanitization methods itself. It is a convenient method to define a new schema starting with the default value. Use it as an entry point for any other kind of schema.
+
+Example of a schema where we start by defining the default value first:
+
+```ts
+import { value } from "@corets/schema"
+
+const schema = value("foo").string()
+```
+
+The example above is equivalent to this:
+
+```ts
+import { string } from "@corets/schema"
+
+const schema = string().toDefault("foo")
+```
+
+**Note:** Defining a default value is totally optional, but might be very useful, since you can use the [`Schema.sanitize`](#schemasanitize) to prefill a value with some default data - think *forms*.
+
+## `value.string`
+
+Create a new [`string`](#string) schema starting with the default value:
+
+```ts
+import { value } from "@corets/schema"
+
+value("foo").string()
+```
+
+## `value.number`
+
+Create a new [`number`](#number) schema starting with the default value:
+
+```ts
+import { value } from "@corets/schema"
+
+value("foo").number()
+```
+
+## `value.boolean`
+
+Create a new [`boolean`](#boolean) schema starting with the default value:
+
+```ts
+import { value } from "@corets/schema"
+
+value("foo").boolean()
+```
+
+## `value.date`
+
+Create a new [`date`](#date) schema starting with the default value:
+
+```ts
+import { value } from "@corets/schema"
+
+value("foo").date()
+```
+
+## `value.array`
+
+Create a new [`array`](#array) schema starting with the default value:
+
+```ts
+import { value } from "@corets/schema"
+
+value("foo").array()
+```
+
+## `value.object`
+
+Create a new [`object`](#object) schema starting with the default value:
+
+```ts
+import { value } from "@corets/schema"
+
+value("foo").object()
+```
+
+## `value.mixed`
+
+Create a new [`mixed`](#mixed) schema starting with the default value:
+
+```ts
+import { value } from "@corets/schema"
+
+value("foo").mixed()
+```
+
+## `string`
+
+Contains various validators and sanitizers for strings:
+
+```ts
+import { string } from "@corets/schema"
+
+const schema = string()
+```
+
+Create a schema instance without the factory function:
+
+```ts
+import { StringSchema } from "@corets/schema"
+
+const schema = new StringSchema()
+```
+
+## `string.required`
+
+Value must be a non-empty string. Active by default:
+
+```ts
+import { string } from "@corets/schema"
+
+string().required()
+string().required(true, "Message")
+string().required(() => true, () => "Message")
+```
+
+## `string.optional`
+
+Value might be a string, opposite of [`string.required()`](#stringrequired):
+
+```ts
+import { string } from "@corets/schema"
+
+string().optional()
+string().optional("Message")
+string().optional(() => "Message")
+```
+
+## `string.equals`
+
+String must be equal to the given value:
+
+```ts
+import { string } from "@corets/schema"
+
+string().equals("foo")
+string().equals("foo", "Message")
+string().equals(() => "foo", () => "Message")
+```
+
+## `string.length`
+
+String must have an exact length:
+
+```ts
+import { string } from "@corets/schema"
+
+string().length(3)
+string().length(3, "Message")
+string().length(() => 3, () => "Message")
+```
+
+## `string.min`
+
+String must not be shorter than given value:
+
+```ts
+import { string } from "@corets/schema"
+
+string().min(3)
+string().min(3, "Message")
+string().min(() => 3, () => "Message")
+```
+
+## `string.max`
+
+String must not be longer than given value:
+
+```ts
+import { string } from "@corets/schema"
+
+string().max(3)
+string().max(3, "Message")
+string().max(() => 3, () => "Message")
+```
+
+## `string.between`
+
+String must have a length between min and max:
+
+```ts
+import { string } from "@corets/schema"
+
+string().between(3, 6)
+string().between(3, 6, "Message")
+string().between(() => 3, () => 6, () => "Message")
+```
+
+## `string.matches`
+
+String must match given RegExp:
+
+```ts
+import { string } from "@corets/schema"
+
+string().matches(/^red/)
+string().matches(/^red/, "Message")
+string().matches(() => /^red/, () => "Message")
+```
+## `string.email`
+
+String must be a valid email address:
+
+```ts
+import { string } from "@corets/schema"
+
+string().email()
+string().email("Message")
+string().email(() => "Message")
+```
+
+## `string.url`
+
+String must be a valid URL:
+
+```ts
+import { string } from "@corets/schema"
+
+string().url()
+string().url("Message")
+string().url(() => "Message")
+```
+
+## `string.startsWith`
+
+String must start with a given value:
+
+```ts
+import { string } from "@corets/schema"
+
+string().startsWith("foo")
+string().startsWith("foo", "Message")
+string().startsWith(() => "foo", () => "Message")
+```
+
+## `string.endsWith`
+
+String must end with a given value:
+
+```ts
+import { string } from "@corets/schema"
+
+string().endsWith("foo")
+string().endsWith("foo", "Message")
+string().endsWith(() => "foo", () => "Message")
+```
+
+## `string.includes`
+
+String must include a given substring:
+
+```ts
+import { string } from "@corets/schema"
+
+string().includes("foo")
+string().includes("foo", "Message")
+string().includes(() => "foo", () => "Message")
+```
+
+## `string.omits`
+
+String must not include a given substring:
+
+```ts
+import { string } from "@corets/schema"
+
+string().omits("foo")
+string().omits("foo", "Message")
+string().omits(() => "foo", () => "Message")
+```
+
+## `string.oneOf`
+
+String must be one of the whitelisted values:
+
+```ts
+import { string } from "@corets/schema"
+
+string().oneOf(["foo", "bar"])
+string().oneOf(["foo", "bar"], "Message")
+string().oneOf(() => ["foo", "bar"], () => "Message")
+```
+
+## `string.noneOf`
+
+String must not be one of the blacklisted values:
+
+```ts
+import { string } from "@corets/schema"
+
+string().noneOf(["foo", "bar"])
+string().noneOf(["foo", "bar"], "Message")
+string().noneOf(() => ["foo", "bar"], () => "Message")
+```
+
+## `string.numeric`
+
+String must contain numbers only, including floats:
+
+```ts
+import { string } from "@corets/schema"
+
+string().numeric()
+string().numeric("Message")
+string().numeric(() => "Message")
+```
+
+## `string.alpha`
+
+String must contain letters only:
+
+```ts
+import { string } from "@corets/schema"
+
+string().alpha()
+string().alpha("Message")
+string().alpha(() => "Message")
+```
+
+## `string.alphaNumeric`
+
+String must contain numbers and letters only:
+
+```ts
+import { string } from "@corets/schema"
+
+string().alphaNumeric()
+string().alphaNumeric("Message")
+string().alphaNumeric(() => "Message")
+```
+
+## `string.alphaDashes`
+
+String must contain letters and dashes `-` only:
+
+```ts
+import { string } from "@corets/schema"
+
+string().alphaDashes()
+string().alphaDashes("Message")
+string().alphaDashes(() => "Message")
+```
+
+## `string.alphaUnderscores`
+
+String must contain letters and underscores `_` only:
+
+```ts
+import { string } from "@corets/schema"
+
+string().alphaUnderscores()
+string().alphaUnderscores("Message")
+string().alphaUnderscores(() => "Message")
+```
+
+## `string.alphaNumericDashes`
+
+String must contain letters, numbers and dashes only:
+
+```ts
+import { string } from "@corets/schema"
+
+string().alphaNumericDashes()
+string().alphaNumericDashes("Message")
+string().alphaNumericDashes(() => "Message")
+```
+
+## `string.alphaNumericUnderscores`
+
+String must contain letters, numbers and underscores only:
+
+```ts
+import { string } from "@corets/schema"
+
+string().alphaNumericUnderscores()
+string().alphaNumericUnderscores("Message")
+string().alphaNumericUnderscores(() => "Message")
+```
+
+## `string.date`
+
+String must be a valid ISO date string:
+
+```ts
+import { string } from "@corets/schema"
+
+string().date()
+string().date("Message")
+string().date(() => "Message")
+```
+
+## `string.dateBefore`
+
+String must be a valid ISO date string before the given date:
+
+```ts
+import { string } from "@corets/schema"
+
+string().dateBefore(new Date())
+string().dateBefore(new Date(), "Message")
+string().dateBefore(() => new Date(), () => "Message")
+```
+
+## `string.dateBeforeOrSame`
+
+Similar to [`string.dateBefore()`](#stringdatebefore), but allows dates to be equal:
+
+```ts
+import { string } from "@corets/schema"
+
+string().dateBeforeOrSame(new Date())
+string().dateBeforeOrSame(new Date(), "Message")
+string().dateBeforeOrSame(() => new Date(), () => "Message")
+```
+
+## `string.dateAfter`
+
+String must be a valid ISO date string after the given date:
+
+```ts
+import { string } from "@corets/schema"
+
+string().dateAfter(new Date())
+string().dateAfter(new Date(), "Message")
+string().dateAfter(() => new Date(), () => "Message")
+```
+
+## `string.dateAfterOrSame`
+
+Similar to [`string.dateAfter()`](#stringdateafter), but allows dates to be equal:
+
+```ts
+import { string } from "@corets/schema"
+
+string().dateAfterOrSame(new Date())
+string().dateAfterOrSame(new Date(), "Message")
+string().dateAfterOrSame(() => new Date(), () => "Message")
+```
+
+## `string.dateBetween`
+
+String must be a valid ISO date string between the two given dates:
+
+```ts
+import { string } from "@corets/schema"
+
+string().dateBetween(new Date(), new Date())
+string().dateBetween(new Date(), new Date(), "Message")
+string().dateBetween(() => new Date(), () => new Date(), () => "Message")
+```
+
+## `string.dateBetweenOrSame`
+
+Similar to [`string.dateBetween()`](#stringdatebetween), but allows dates to be equal:
+
+```ts
+import { string } from "@corets/schema"
+
+string().dateBetweenOrSame(new Date(), new Date())
+string().dateBetweenOrSame(new Date(), new Date(), "Message")
+string().dateBetweenOrSame(() => new Date(), () => new Date(), () => "Message")
+```
+
+## `string.time`
+
+String must be a valid ISO time string:
+
+```ts
+import { string } from "@corets/schema"
+
+string().time()
+string().time("Message")
+string().time(() => "Message")
+```
+
+## `string.timeBefore`
+
+String must be a valid ISO time string before the given time:
+
+```ts
+import { string } from "@corets/schema"
+
+string().timeBefore("10:00")
+string().timeBefore("10:00", "Message")
+string().timeBefore(() => "10:00", () => "Message")
+```
+
+## `string.timeBeforeOrSame`
+
+Similar to [`string.timeBefore()`](#stringtimebefore), but allows times to be equal:
+
+```ts
+import { string } from "@corets/schema"
+
+string().timeBeforeOrSame("10:00")
+string().timeBeforeOrSame("10:00", "Message")
+string().timeBeforeOrSame(() => "10:00", () => "Message")
+```
+
+## `string.timeAfter`
+
+String must be a valid ISO time string after the given time:
+
+```ts
+import { string } from "@corets/schema"
+
+string().timeAfter("10:00")
+string().timeAfter("10:00", "Message")
+string().timeAfter(() => "10:00", () => "Message")
+```
+
+## `string.timeAfterOrSame`
+
+Similar to [`string.timeAfter()`](#stringtimeafter), but allows times to be equal:
+
+```ts
+import { string } from "@corets/schema"
+
+string().timeAfterOrSame("10:00")
+string().timeAfterOrSame("10:00", "Message")
+string().timeAfterOrSame(() => "10:00", () => "Message")
+```
+
+## `string.timeBetween`
+
+String must be a valid ISO time string between the two given times:
+
+```ts
+import { string } from "@corets/schema"
+
+string().timeBetween("10:00", "15:00")
+string().timeBetween("10:00", "15:00", "Message")
+string().timeBetween(() => "10:00", () => "15:00", () => "Message")
+```
+
+## `string.timeBetweenOrSame`
+
+Similar to [`string.timeBetween()`](#stringtimebetween), but allows dates to be equal:
+
+```ts
+import { string } from "@corets/schema"
+
+string().dateBetweenOrSame(new Date(), new Date())
+string().dateBetweenOrSame(new Date(), new Date(), "Message")
+string().dateBetweenOrSame(() => new Date(), () => new Date(), () => "Message")
+```
+
+## `string.dateTime`
+
+String must be a valid ISO date time string:
+
+```ts
+import { string } from "@corets/schema"
+
+string().dateTime()
+string().dateTime("Message")
+string().dateTime(() => "Message")
+```
+
+## `string.toDefault`
+
+Provide a fallback value in case the underlying value is not a string:
+
+```ts
+import { string } from "@corets/schema"
+
+string().toDefault("default value")
+string().toDefault("default value")
+string().toDefault(() => "default value")
+```
+
+## `string.toUpperCase`
+
+Convert string to all upper case:
+
+```ts
+import { string } from "@corets/schema"
+
+string().toUpperCase()
+```
+
+## `string.toLowerCase`
+
+Convert string to all lower case:
+
+```ts
+import { string } from "@corets/schema"
+
+string().toLowerCase()
+```
+
+## `string.toCapitalized`
+
+Capitalize first letter:
+
+```ts
+import { string } from "@corets/schema"
+
+string().toCapitalized()
+```
+
+## `string.toCamelCase`
+
+Convert string to `camelCase`:
+
+```ts
+import { string } from "@corets/schema"
+
+string().toCamelCase()
+```
+
+## `string.toSnakeCase`
+
+Convert string to `snake_case`:
+
+```ts
+import { string } from "@corets/schema"
+
+string().toSnakeCase()
+```
+
+## `string.toKebabCase`
+
+Convert string to `kebab-case`:
+
+```ts
+import { string } from "@corets/schema"
+
+string().toKebabCase()
+```
+
+## `string.toConstantCase`
+
+Convert string to `CONSTANT_CASE`:
+
+```ts
+import { string } from "@corets/schema"
+
+string().toConstantCase()
+```
+
+## `string.toTrimmed`
+
+Trim surrounding white space:
+
+```ts
+import { string } from "@corets/schema"
+
+string().toTrimmed()
+```
+
+## `number`
+
+Contains various validators and sanitizers for numbers:
+
+```ts
+import { number } from "@corets/schema"
+
+const schema = number()
+```
+
+Create a schema instance without the factory function:
+
+```ts
+import { NumberSchema } from "@corets/schema"
+
+const schema = new NumberSchema()
+```
+
+## `number.required`
+
+Value must be a number:
+
+```ts
+import { number } from "@corets/schema"
+
+number().required()
+number().required("Message")
+number().required(() => false, () => "Message")
+```
+
+## `number.optional`
+
+Value might be a number, opposite of [`number.required()`](#numberrequired):
+
+```ts
+import { number } from "@corets/schema"
+
+number().optional()
+number().optional("Message")
+number().optional(() => "Message")
+```
+
+## `number.equals`
+
+Number must be equal to the given value:
+
+```ts
+import { number } from "@corets/schema"
+
+number().equals(3)
+number().equals(3, "Message")
+number().equals(() => 3, () => "Message")
+```
+
+## `number.min`
+
+Number must not be smaller than the given value:
+
+```ts
+import { number } from "@corets/schema"
+
+number().min(5)
+number().min(5, "Message")
+number().min(() => 5, () => "Message")
+```
+
+## `number.max`
+
+Number must not be bigger than the given value:
+
+```ts
+import { number } from "@corets/schema"
+
+number().max(10)
+number().max(10, "Message")
+number().max(() => 10, () => "Message")
+```
+
+## `number.between`
+
+Number must be between the two given numbers:
+
+```ts
+import { number } from "@corets/schema"
+
+number().between(5, 10)
+number().between(5, 10, "Message")
+number().between(() => 5, () => 10, () => "Message")
+```
+
+## `number.between`
+
+Number must be positive - bigger than zero:
+
+```ts
+import { number } from "@corets/schema"
+
+number().positive()
+number().positive("Message")
+number().positive(() => "Message")
+```
+
+## `number.negative`
+
+Number must be negative - smaller than zero:
+
+```ts
+import { number } from "@corets/schema"
+
+number().negative()
+number().negative("Message")
+number().negative(() => "Message")
+```
+
+## `number.integer`
+
+Number must be an integer - no floats:
+
+```ts
+import { number } from "@corets/schema"
+
+number().integer()
+number().integer("Message")
+number().integer(() => "Message")
+```
+
+## `number.toDefault`
+
+Default value in case the underlying value is not a number:
+
+```ts
+import { number } from "@corets/schema"
+
+number().toDefault(10)
+number().toDefault(() => 10)
+```
+
+## `number.toRounded`
+
+Round value using [`Math.round()`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math/round):
+
+```ts
+import { number } from "@corets/schema"
+
+number().toRounded(2)
+number().toRounded(() => 2)
+```
+
+## `number.toFloored`
+
+Round value using [`Math.floor()`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math/floor):
+
+```ts
+import { number } from "@corets/schema"
+
+number().toFloored()
+```
+
+## `number.toCeiled`
+
+Round value using [`Math.ceil()`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math/ceil):
+
+```ts
+import { number } from "@corets/schema"
+
+number().toCeiled()
+```
+
+## `number.toTrunced`
+
+Trunc value using [`Math.trunc()`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math/trunc). Drops everything after the decimal point:
+
+```ts
+import { number } from "@corets/schema"
+
+number().toTrunced()
+```
+
+## `boolean`
+
+Contains various validators and sanitizers for booleans:
+
+```ts
+import { boolean } from "@corets/schema"
+
+const schema = boolean()
+```
+
+Create a schema instance without the factory function:
+
+```ts
+import { BooleanSchema } from "@corets/schema"
+
+const schema = new BooleanSchema()
+```
+
+## `boolean.required`
+
+Value must be a boolean:
+
+```ts
+import { boolean } from "@corets/schema"
+
+boolean().required()
+boolean().required(false, "Message")
+boolean().required(() => false, () =>"Message")
+```
+
+## `boolean.optional`
+
+Value might be a boolean, opposite of [`boolean.required()`](#booleanrequired):
+
+```ts
+import { boolean } from "@corets/schema"
+
+boolean().optional()
+boolean().optional("Message")
+boolean().optional(() => "Message")
+```
+
+## `boolean.equals`
+
+Number must be equal to the given value:
+
+```ts
+import { boolean } from "@corets/schema"
+
+boolean().equals(true)
+boolean().equals(true, "Message")
+boolean().equals(() => true, () => "Message")
+```
+
+## `boolean.toDefault`
+
+Provide a fallback value in case the underlying value is not a boolean:
+
+```ts
+import { boolean } from "@corets/schema"
+
+boolean().toDefault(true)
+boolean().toDefault(() => true)
+```
+
+## `date`
+
+Contains various validators and sanitizers for dates:
+
+```ts
+import { date } from "@corets/schema"
+
+const schema = date()
+```
+
+Create a schema instance without the factory function:
+
+```ts
+import { DateSchema } from "@corets/schema"
+
+const schema = new DateSchema()
+```
+
+## `date.required`
+
+Value must be a date:
+
+```ts
+import { date } from "@corets/schema"
+
+date().required()
+date().required(false, "Message")
+date().required(() => false, () => "Message")
+```
+
+## `date.optional`
+
+Value might be a date, opposite of [`date.required()`](#daterequired):
+
+```ts
+import { date } from "@corets/schema"
+
+date().optional()
+date().optional("Message")
+date().optional(() => "Message")
+```
+
+## `date.equals`
+
+Date must be equal to the given value:
+
+```ts
+import { date } from "@corets/schema"
+
+date().equals(new Date())
+date().equals(new Date(), "Message")
+date().equals(() => new Date(), () => "Message")
+```
+
+## `date.after`
+
+Underlying value must be after the given date:
+
+```ts
+import { date } from "@corets/schema"
+
+date().after(new Date())
+date().after(new Date(), "Message")
+date().after(() => new Date(), () => "Message")
+```
+
+## `date.before`
+
+Underlying value must be before the given date:
+
+```ts
+import { date } from "@corets/schema"
+
+date().before(new Date())
+date().before(new Date(), "Message")
+date().before(() => new Date(), () => "Message")
+```
+
+## `date.between`
+
+Underlying value must be between the two dates:
+
+```ts
+import { date } from "@corets/schema"
+
+date().between(new Date(), new Date())
+date().between(new Date(), new Date(), "Message")
+date().between(() => new Date(), () => new Date(), () => "Message")
+```
+
+## `date.toDefault`
+
+Provide a fallback value in case the underlying value is not a date:
+
+```ts
+import { date } from "@corets/schema"
+
+date().toDefault(new Date())
+date().toDefault(new Date(), "Message")
+date().toDefault(() => new Date(), () => "Message")
+```
+
+## `array`
+
+Contains various validators and sanitizers for arrays:
+
+```ts
+import { array, string } from "@corets/schema"
+
+const schema = array()
+```
+
+Create a schema instance without the factory function:
+
+```ts
+import { ArraySchema } from "@corets/schema"
+
+const schema = new ArraySchema()
+```
+
+Define a schema for array children:
+
+```ts
+import { array, string } from "@corets/schema"
+
+const schema = array(
+  string().min(2)
+)
+```
+
+## `array.required`
+
+Value must be an array:
+
+```ts
+import { array } from "@corets/schema"
+
+array().required()
+array().required(false, "Message")
+array().required(() => false, () => "Message")
+```
+
+## `array.optional`
+
+Value might be a array, opposite of [`array.required()`](#arrayrequired):
+
+```ts
+import { array } from "@corets/schema"
+
+array().optional()
+array().optional("Message")
+array().optional(() => "Message")
+```
+
+## `array.equals`
+
+Array must be equal to the given value:
+
+```ts
+import { array } from "@corets/schema"
+
+array().equals([1, 2])
+array().equals([1, 2], "Message")
+array().equals(() => [1, 2], () => "Message")
+```
+
+## `array.length`
+
+Array must have an exact length:
+
+```ts
+import { array } from "@corets/schema"
+
+array().length(3)
+array().length(3, "Message")
+array().length(() => 3, () => "Message")
+```
+
+## `array.min`
+
+Array must not be shorter than the given length:
+
+```ts
+import { array } from "@corets/schema"
+
+array().min(3)
+array().min(3, "Message")
+array().min(() => 3, () => "Message")
+```
+
+## `array.max`
+
+Array must not be longer than the given length:
+
+```ts
+import { array } from "@corets/schema"
+
+array().max(3)
+array().max(3, "Message")
+array().max(() => 3, () => "Message")
+```
+
+## `array.between`
+
+Array must have a length between the two given values:
+
+```ts
+import { array } from "@corets/schema"
+
+array().between(3, 5)
+array().between(3, 5, "Message")
+array().between(() => 3, () => 5, () => "Message")
+```
+
+## `array.someOf`
+
+Array must only contain whitelisted values:
+
+```ts
+import { array } from "@corets/schema"
+
+array().someOf([3, 4])
+array().someOf([3, 4], "Message")
+array().someOf(() => [3, 4], () => "Message")
+```
+
+## `array.noneOf`
+
+Array must not contain any of the blacklisted values:
+
+```ts
+import { array } from "@corets/schema"
+
+array().noneOf([3, 4])
+array().noneOf([3, 4], "Message")
+array().noneOf(() => [3, 4], () => "Message")
+```
+
+## `array.shape`
+
+Specify a schema for array items. Every item must be valid according to the schema:
+
+```ts
+import { array, string } from "@corets/schema"
+
+array().shape(string().min(3))
+array().shape(() => string().min(3))
+```
+
+You can pass a shape directly to the [`array()`](#array) method too:
+
+```ts
+import { array, string } from "@corets/schema"
+
+array(string().min(3))
+array(() => string().min(3))
+```
+
+## `array.toDefault`
+
+Provide a default value in case the underlying value is not an array:
+
+```ts
+import { array } from "@corets/schema"
+
+array().toDefault([1, 2])
+array().toDefault(() => [1, 2])
+```
+
+## `array.toFiltered`
+
+Filter out invalid array items manually:
+
+```ts
+import { array } from "@corets/schema"
+
+const isString = (value) => typeof value === "string"
+
+array().toFiltered(isString)
+```
+
+## `array.toMapped`
+
+Map every array item manually:
+
+```ts
+import { array } from "@corets/schema"
+
+const toUpperCase = (value) => typeof value === "string" ? value.toUpperCase() : value
+
+array().toMapped(toUpperCase)
+```
+
+## `array.toCompact`
+
+Filter out all `falsey` values like `null`, `undefined`, `"""` and `0`:
+
+```ts
+import { array } from "@corets/schema"
+
+array().toCompact()
+```
+
+## `array.toUnique`
+
+Filter out all duplicate values:
+
+```ts
+import { array } from "@corets/schema"
+
+array().toUnique()
+```
+
+## `object`
+
+Contains various validators and sanitizers for objects:
+
+```ts
+import { object, string } from "@corets/schema"
+
+const schema = object()
+```
+
+Create a schema instance without the factory function:
+
+```ts
+import { ObjectSchema } from "@corets/schema"
+
+const schema = new ObjectSchema()
+```
+
+Define a schema for each object property:
+
+```ts
+import { object, string } from "@corets/schema"
+
+object({
+  foo: string().min(2)
+})
+```
+
+## `object.required`
+
+Value must be an object:
+
+```ts
+import { object } from "@corets/schema"
+
+object().required()
+object().required(false, "Message")
+object().required(() => false, () => "Message")
+```
+
+## `object.optional`
+
+Value might be an object, opposite of [`object.required()`](#objectrequired):
+
+```ts
+import { object } from "@corets/schema"
+
+object().optional()
+object().optional("Message")
+object().optional(() => "Message")
+```
+
+## `object.equals`
+
+Underlying value must be equal to the given value:
+
+```ts
+import { object } from "@corets/schema"
+
+object().equals({foo: "bar"})
+object().equals({foo: "bar"}, "Message")
+object().equals(() => {foo: "bar"}, () => "Message")
+```
+
+## `object.shape`
+
+Shape an object and set up schemas for all of its properties:
+
+```ts
+import { object, string } from "@corets/schema"
+
+object().shape({ firstName: string().min(3).max(20) })
+```
+
+You can pass a shape directly to the [`object()`](#object) method too:
+
+```ts
+import { object, string } from "@corets/schema"
+
+object({ firstName: string().min(3).max(20) })
+```
+
+## `object.allowUnknownKeys`
+
+Allow object to contain keys that have not been configured through [`object.shape()`](#objectshape):
+
+```ts
+import { object, string } from "@corets/schema"
+
+object()
+  .shape({ firstName: string().min(3).max(20) })
+  .allowUnknownKeys()
+```
+
+## `object.disallowUnknownKeys`
+
+Forbid object to contain keys that have not been configured through [`object.shape()`](#objectshape), active by default:
+
+```ts
+import { object, string } from "@corets/schema"
+
+object()
+  .shape({ firstName: string().min(3).max(20) })
+  .disallowUnknownKeys()
+```
+
+## `object.shapeUnknownKeys`
+
+Shape unknown object keys to make sure they adhere to a certain format:
+
+```ts
+import { object, string } from "@corets/schema"
+
+object()
+  .shape({ firstName: string().min(3).max(20) })
+  .shapeUnknownKeys(string().min(3).toCamelCase())
+```
+
+## `object.shapeUnknownValues`
+
+Shape unknown object values to make sure they adhere to a format:
+
+```ts
+import { object, string } from "@corets/schema"
+
+object()
+  .shape({ firstName: string().min(3).max(20) })
+  .shapeUnknownValues(string().min(3).max(20))
+```
+
+## `object.toDefault`
+
+Provide a fallback value in case the underlying value is not an object:
+
+```ts
+import { object } from "@corets/schema"
+
+object().toDefault({title: "Foo"})
+object().toDefault(() => ({title: "Foo"}))
+```
+
+## `object.toCamelCaseKeys`
+
+Transform all object keys to `camelCase`:
+
+```ts
+import { object } from "@corets/schema"
+
+object().toCamelCaseKeys()
+```
+
+## `object.toCamelCaseKeysDeep`
+
+Transform all object keys deeply to `camelCase`:
+
+```ts
+import { object } from "@corets/schema"
+
+object().toCamelCaseKeysDeep()
+```
+
+## `object.toSnakeCaseKeys`
+
+Transform all object keys to `snake_case`:
+
+```ts
+import { object } from "@corets/schema"
+
+object().toSnakeCaseKeys()
+```
+
+## `object.toSnakeCaseKeysDeep`
+
+Transform all object keys deeply to `snake_case`:
+
+```ts
+import { object } from "@corets/schema"
+
+object().toSnakeCaseKeysDeep()
+```
+
+## `object.toKebabCaseKeys`
+
+Transform all object keys to `kebab-case`:
+
+```ts
+import { object } from "@corets/schema"
+
+object().toKebabCaseKeys()
+```
+
+## `object.toKebabCaseKeysDeep`
+
+Transform all object keys deeply to `kebab-case`:
+
+```ts
+import { object } from "@corets/schema"
+
+object().toKebabCaseKeysDeep()
+```
+
+## `object.toConstantCaseKeys`
+
+Transform all object keys to `CONSTANT_CASE`:
+
+```ts
+import { object } from "@corets/schema"
+
+object().toConstantCaseKeys()
+```
+
+## `object.toConstantCaseKeysDeep`
+
+Transform all object keys deeply to `CONSTANT_CASE`:
+
+```ts
+import { object } from "@corets/schema"
+
+object().toConstantCaseKeysDeep()
+```
+
+## `object.toMappedValues`
+
+Transform all object values:
+
+```ts
+import { object } from "@corets/schema"
+
+object().toMappedValues((value, key) => value)
+```
+
+## `object.toMappedValuesDeep`
+
+Transform all object values deeply:
+
+```ts
+import { object } from "@corets/schema"
+
+object().toMappedValuesDeep((value, key) => value)
+```
+
+## `object.toMappedKeys`
+
+Transform all object keys:
+
+```ts
+import { object } from "@corets/schema"
+
+object().toMappedKeys((value, key) => key)
+```
+
+## `object.toMappedKeysDeep`
+
+Transform all object keys deeply:
+
+```ts
+import { object } from "@corets/schema"
+
+object().toMappedKeysDeep((value, key) => key)
+```
+
+## `mixed`
+
+Contains various validators and sanitizers for mixed data types:
+
+```ts
+import { mixed } from "@corets/schema"
+
+const schema = mixed()
+```
+
+Create a schema instance without the factory function:
+
+```ts
+import { MixedSchema } from "@corets/schema"
+
+const schema = new MixedSchema()
+```
+
+## `mixed.required`
+
+Value must not be `null` nor `undefined`:
+
+```ts
+import { mixed } from "@corets/schema"
+
+mixed().required()
+mixed().required(false, "Message")
+mixed().required(() => false, () => "Message")
+```
+
+## `mixed.optional`
+
+Value might als be a `null` or `undefined`, opposite of [`mixed.required()`](#mixedrequired):
+
+```ts
+import { mixed } from "@corets/schema"
+
+mixed().optional()
+mixed().optional("Message")
+mixed().optional(() => "Message")
+```
+
+## `mixed.equals`
+
+Underlying value must be equal to the given value:
+
+```ts
+import { mixed } from "@corets/schema"
+
+mixed().equals("yolo")
+mixed().equals("yolo", "Message")
+mixed().equals(() => "yolo", () => "Message")
+```
+
+## `mixed.oneOf`
+
+Underlying value must be one of the whitelisted values:
+
+```ts
+import { mixed } from "@corets/schema"
+
+mixed().oneOf(["foo", "bar"])
+mixed().oneOf(["foo", "bar"], "Message")
+mixed().oneOf(() => ["foo", "bar"], () => "Message")
+```
+
+## `mixed.noneOf`
+
+Underlying value must not be one of the blacklisted values:
+
+```ts
+import { mixed } from "@corets/schema"
+
+mixed().noneOf(["foo", "bar"])
+mixed().noneOf(["foo", "bar"], "Message")
+mixed().noneOf(() => ["foo", "bar"], () => "Message")
+```
+
+## `mixed.toDefault`
+
+Provide a fallback value in case the underlying value is a `null` or `undefined`:
+
+```ts
+import { mixed } from "@corets/schema"
+
+mixed().toDefault("foo")
+mixed().toDefault("foo", "Message")
+mixed().toDefault(() => "foo", () => "Message")
+```

@@ -1,0 +1,52 @@
+---
+name: Use Action
+route: /use-action
+---
+
+import { Header } from "../shared/Header"
+
+<Header repository="use-action" />
+
+# Use Action
+
+This package is built on top of [@corets/use-async](/use-async). The purpose of this package is to be able to encapsulate any async operation into a standardized handle that can be run on demand and awaited. Example use case: You have an async operation, like send some data to an endpoint, you create an async action and trigger it when the time is right. You don't have to worry about state related things like `running` indicators, `result`, `error` handling, etc. It's all available directly on the action.
+
+```bash
+yarn add @corets/use-action
+```
+
+## `useAction`
+
+```tsx
+import React, { useState } from "react"
+import { useAction } from "@corets/use-action"
+
+const Example = () => {
+  const [likesCount, setLikesCount] = useState(0)
+  const likeAction = useAction(async (count: number) => {
+    // some http magic
+    return count
+  })
+
+  const handleLike = async () => {
+    if ( ! likeAction.running) {
+      const result = await likeAction.run(likesCount + 1)
+
+      if ( ! likeAction.error) {
+        setLikesCount(result)
+        // or
+        setLikesCount(likeAction.result)
+      }
+    }
+  }
+
+  return (
+    <div>
+      { likeAction.running && "Loading..."}
+      { likeAction.errored && `There was an error: ${likeAction?.error.toString()}` }
+
+      <button onClick={handleLike}>Like {likesCount}</button>
+    </div>
+  )
+}
+```

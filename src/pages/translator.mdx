@@ -1,0 +1,345 @@
+---
+name: Translator
+route: /translator
+---
+
+import { Header } from "../shared/Header"
+
+<Header repository="translator" />
+
+# Translator
+
+Simple translation library that works everywhere.
+
+```bash
+yarn add @corets/translator
+```
+
+## React
+
+Before you can start using this library inside React, you have to add the [@corets/use-translator](/use-translator) package first. It provides a seamless integration through a hooks based API.
+
+## Custom interpolations
+
+Provide a custom interpolation function, that is replacing placeholders with replacements:
+
+```ts
+import { createTranslator } from "@corets/translator"
+
+const customInterpolator = (text: string, match: string, replacement: any) => {
+  return text.replace(`{ ${match} }`, replacement)
+}
+
+const translator = createTranslator({}, { interpolator: customInterpolator })
+```
+
+## Custom formatting
+
+Provide a custom formatter function, that formats replacements:
+
+```ts
+import { createTranslator, formatter } from "@corets/translator"
+import dayjs from "dayjs"
+
+const customFormatter = (language: string, replacement: any, replacements: object) => {
+  // custom formatting for dates
+  if (replacement instanceof Date) {
+    const format = replacements?.format ?? "DD.MM.YYYY"
+
+    return dayjs(replacement).format(format)
+  }
+
+  // fallback to default behaviour
+  return formatter(language, replacement, replacements)
+}
+
+const translator = createTranslator({}, { formatter: customFormatter })
+```
+
+## Custom placeholder for missing keys
+
+Provide a custom placeholder for missing translation keys:
+
+```ts
+import { createTranslator } from "@corets/translator"
+
+const customPlaceholder = (language: string, key: string, replacements: object) => `${language}.${key}`
+
+const translator = createTranslator({}, { placeholder: customPlaceholder })
+```
+
+## `createTranslator`
+
+Creates a new instance of `Translator`.
+
+```ts
+import { createTranslator } from "@corets/translator"
+
+const translations = {
+  en: { title: "Welcome" },
+  de: { title: "Willkommen" }
+}
+
+const translator = createTranslator(translations, { language: "en" })
+```
+
+Create a translator instance without the factory function:
+
+```ts
+import { Translator } from "@corets/translator"
+
+const translator = new Translator({}, { language: "en" })
+```
+
+## `Translator.config`
+
+Configure translator:
+
+```ts
+import { createTranslator } from "@corets/translator"
+
+const translator = createTranslator({}, { language: "en" })
+
+translator.config({
+  // current language
+  language: "en",
+  // fallback to another language if the translation key is missing
+  fallbackLanguage: "de",
+  // should translations be templatized? (default: true)
+  templatize: true,
+  // custom replacements formatter
+  formatter,
+  // custom message interpolator
+  interpolator,
+  // custom formatter for missing translation keys
+  placeholder,
+})
+```
+
+## `Translator.getLanguage`
+
+Get current language:
+
+```ts
+translator.getLanguage()
+```
+
+## `Translator.setLanguage`
+
+Change current language:
+
+```ts
+translator.setLanguage("en")
+```
+
+## `Translator.getLanguages`
+
+Get all registered languages:
+
+```ts
+translator.getLanguages()
+```
+
+## `Translator.getFallbackLanguage`
+
+Get fallback language:
+
+```ts
+transaltor.getFallbackLanguage()
+```
+
+**Note:** A fallback language is used whenever a translation key is missing from the current language.
+
+## `Translator.setFallbackLanguage`
+
+Change fallback language:
+
+```ts
+translator.setFallbackLanguage("de")
+```
+
+## `Translator.getTranslations`
+
+Get all registered translations:
+
+```ts
+translator.getTranslations()
+```
+
+The returned object looks something like this:
+
+```ts
+{
+  en: { key: "value" },
+  de: { key: "value" },
+}
+```
+
+## `Translator.getTranslationsForLanguage`
+
+Get all translations for a specific langauge:
+
+```ts
+translator.getTranslationsForLanguage("en")
+```
+
+The returned object looks something like this:
+
+```ts
+{
+  key: "value"
+}
+```
+
+## `Translator.setTranslations`
+
+Replace all translations, for all languages, with new ones:
+
+```ts
+translator.setTranslations({ en: { key: "value" }})
+```
+
+## `Translator.setTranslationsForLanguage`
+
+Replace all translations for a specific language:
+
+```ts
+translator.setTranslationsForLanguage("en", { key: "value" })
+```
+
+## `Translator.addTranslations`
+
+Add translations, for all languages, using a merge:
+
+```ts
+translator.addTranslations({ de: { key: "value" } })
+```
+
+**Note:** Contrary to the [`Translator.setTranslations`](#translatorsettranslations) method, this one will not replace all translations but do a merge instead.
+
+## `Translator.addTranslationsForLanguage`
+
+Add translations, for a specific language, using a merge:
+
+```ts
+translator.addTranslationsForLanguage("en", { key: "value" })
+```
+
+**Note:** Contrary to the [`Translator.setTranslationsForLanguage`](#translatorsettranslationsforlanguage) method, this one will not replace all translations but do a merge instead.
+
+## `Translator.get`
+
+Retrieve a translation:
+
+```ts
+translator.get("key")
+```
+
+Retrieve a translation with a nested key:
+
+```ts
+translator.get("nested.key")
+```
+
+Retrieve translation for another language:
+
+```ts
+translator.get("key", { language: "de" })
+```
+
+Retrieve translation with another fallback language:
+
+```ts
+translator.get("key", { fallbackLanguage: "de" })
+```
+
+Retrieve translation without templatizing it:
+
+```ts
+translator.get("key", { templatize: false })
+```
+
+Retrieve a translation and interpolate some values, using array syntax:
+
+```ts
+// given translation at "key" is "Did you know, $1 and $2 are colors?"
+translator.get("key", ["red", "blue"])
+// you'll get "Did you know, red and blue are colors?"
+```
+
+Retrieve a translation and interpolate some values, using object syntax:
+
+```ts
+// given translation at "key" is "Did you know, $color1 and $color2 are colors?"
+translator.get("key", { color1: "red", color2: "blue" })
+// you'll get "Did you know, red and blue are colors?"
+```
+
+Retrieve translation with a custom formatter, interpolator and placeholder:
+
+```ts
+translator.get("key", { formatter, interpolator, placeholder })
+```
+
+**Note:** Read more [formatter](#custom-formatting), [interpolator](#custom-interpolations), and [placeholder](#custom-placeholder-for-missing-keys).
+
+## `Translator.has`
+
+Check if translation exists:
+
+```ts
+translator.has("key")
+```
+
+Check if translation exists for a specific language:
+
+```ts
+translator.has("key", { language: "en" })
+```
+
+Check if translation exists in the current langauge or in a specific fallback language:
+
+```ts
+translator.has("key", { fallbackLanguage: "de" })
+```
+
+## `Translator.t`
+
+Create a dedicated translation function:
+
+```ts
+const t = translator.t()
+
+t("key")
+```
+
+Create a translation function for a specific scope:
+
+```ts
+const t = translator.t("nested.key")
+
+// the actual path will be "nested.key.key"
+t("key")
+```
+
+Override scope with `~`:
+
+```ts
+const t = translator.t("nested.key")
+
+// the actual path will be "key"
+t("~key")
+```
+
+Method `Translator.t` as well as the translate function accept the same options as the [`Translator.get`](#translatorget) method.
+
+## `Translator.listen`
+
+Listen to any kind of changes (like language change, translations change, etc.):
+
+```ts
+const unsubscribe = translator.listen((translator) => console.log("something changed"))
+
+// unsubscribe from changes
+unsubscribe()
+```

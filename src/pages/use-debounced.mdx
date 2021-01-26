@@ -1,0 +1,48 @@
+---
+name: Use Debounced
+route: /use-debounced
+---
+
+import { Header } from "../shared/Header"
+
+<Header repository="use-debounced" />
+
+# Use Debounced
+
+React hook for debounced operations. Sometimes you need to debounce changes of a value, for example when building a live search. The user types into the search box, but you don't want to make an API call every 10 milliseconds, so you need to debounce that input somehow. This is where this package comes in handy, it allows you to create a debounced version of a certain value.
+
+```bash
+yarn add @corets/use-debounced
+```
+
+## `useDebounced`
+
+```tsx
+import React from "react"
+import { useState, useDebounced } from "@corets/use-debounced"
+import { useAsync } from "@corets/use-async"
+
+const findSomethingSomewhere = (query: string) => { /* some api call implementation */ }
+
+const Example = () => {
+  const [input, setInput] = useState("")
+  const debouncedInput = useDebounced(input, 300)
+  const handle = useAsync(() =>
+    debouncedInput.trim() === ""
+      ? undefined
+      : findSomethingSomewhere(debouncedInput),
+    [debouncedInput]
+  )
+
+  return (
+    <div>
+      <input type="text" onChange={(e) => setInput(e.target.value)} value={input} />
+
+      { ! handle.result && ! handle.loading && <span>Type something into the search box</span>}
+      { handle.loading && <span>Loading...</span>}
+      { handle.errored && <span>There was an error: { handle.error.toString() }</span>}
+      { handle.result && <pre>{ JSON.stringify(handle.result) }</pre>}
+    </div>
+  )
+}
+```

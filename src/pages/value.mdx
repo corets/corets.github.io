@@ -1,0 +1,80 @@
+---
+name: Value
+route: /value
+---
+
+import { Header } from "../shared/Header"
+
+<Header repository="value" />
+
+# Value
+
+Simple observable value that can also be used inside React using Hooks. This observable is accompanied by [@corets/list](/list) and [@corets/store](/store).
+
+```bash
+yarn add @corets/value
+```
+
+## React
+
+You can use values inside React through this hooks based integration [@corets/use-value](/use-value).
+
+## LocalStorage
+
+There is also a version of this library that syncs its state to the localStorage: [@corets/local-storage-value](/local-storage-value)
+
+## `createValue`
+
+Creates a new instance of `Value`:
+
+```ts
+import { createValue } from "@corets/value"
+
+const count = createValue(0)
+```
+
+Create a new instance without the factory function:
+
+```ts
+import { Value } from "@corets/value"
+
+const value = new Value(0)
+```
+
+## `Value.get`
+
+Retrieve value:
+
+```ts
+value.get()
+```
+
+## `Value.set`
+
+Replace value:
+
+```ts
+value.set(2)
+```
+
+## `Value.reset`
+
+Reset value to the initial state that has been provided during its creation:
+
+```ts
+value.reset()
+```
+
+You can also reset with a new state:
+
+```ts
+value.reset(3)
+```
+
+## `Value.listen`
+
+Listen to any changes:
+
+```ts
+value.listen((value) => console.log(value))
+```

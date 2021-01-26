@@ -1,0 +1,31 @@
+---
+name: Save Helpers
+route: /save-helpers
+---
+
+import { Header } from "../shared/Header"
+
+<Header repository="save-helpers" />
+
+# Save Helpers
+
+Various helpers related to save / download specific functionality.
+
+```bash
+yarn add @corets/save-helpers
+```
+
+## `saveAsFile`
+
+Save any kind of data as a file (works only in the browser):
+
+```ts
+import { saveAsFile } from "@corets/save-helpers"
+
+const fileName = "data.csv"
+const data = "name,age\nJohn,30\nSnow,40"
+
+saveAsFile(fileName, data)
+```
+
+

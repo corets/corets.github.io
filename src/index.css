@@ -1,0 +1,34 @@
+h2:before,
+h3:before,
+h4:before,
+h5:before,
+h6:before {
+  content: "# ";
+}
+
+[data-testid="nav-search"] {
+  /*display: none !important;*/
+}
+
+[data-testid="header"] {
+  /*display: none !important;*/
+  background: transparent !important;
+}
+[data-testid="header"] > div > a > svg {
+  display: none !important;
+}
+[data-testid="header"] > div > div > div > a {
+  /*background: #ced4de !important;*/
+  display: none !important;
+}
+
+strong {
+  text-decoration: underline;
+}
+
+p code {
+  background: #f6f8fa;
+  line-height: inherit;
+  padding: 3px 6px;
+  border-radius: 4px;
+}

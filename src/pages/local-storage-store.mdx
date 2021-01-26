@@ -1,0 +1,48 @@
+---
+name: Local Storage Store
+route: /local-storage-store
+---
+
+import { Header } from "../shared/Header"
+
+<Header repository="local-storage-store" />
+
+# Local Storage Store
+
+Built on top of the [@corets/store](/store) package and provides an integration with `localStorage`. Can be used as a drop in replacement for stores from the other package.
+
+```bash
+yarn add @corets/local-storage-store
+```
+
+## React
+
+Example of how to use stores in React:
+
+```tsx
+import React from "react"
+import { createLocalStorageStore } from "@corets/local-storage-store"
+import { useStore } from "@corets/use-store"
+
+const Example = () => {
+  const counterStore = useStore(() => createLocalStorageStore("storageKey", { counter: 0 }))
+
+  const increment = () => counterStore.set({ counter: counterStore.get().counter + 1 })
+
+  return (
+    <div>
+      <button onClick={increment}>{counterStore.get().counter}</button>
+    </div>
+  )
+}
+```
+
+## `createLocalStorageStore`
+
+Create a new store:
+
+```ts
+import { createLocalStorageStore } from "@corets/local-storage-store"
+
+const store = createLocalStorageStore("storageKey", { some: "data" })
+```

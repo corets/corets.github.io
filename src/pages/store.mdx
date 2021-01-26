@@ -1,0 +1,91 @@
+---
+name: Store
+route: /store
+---
+
+import { Header } from "../shared/Header"
+
+<Header repository="store" />
+
+
+
+# Store
+
+Simple observable store that can also be used inside React using Hooks. This observable is accompanied by [@corets/value](/value) and [@corets/list](/list).
+
+```bash
+yarn add @corets/store
+```
+
+## React
+
+You can use stores inside React through this hooks based integration [@corets/use-store](/use-store).
+
+## LocalStorage
+
+There is also a version of this library that syncs its state to the localStorage: [@corets/local-storage-store](/local-storage-store)
+
+
+## `createStore`
+
+Creates a new instance of `Store`:
+
+```ts
+import { createStore } from "@corets/store"
+
+const store = createStore({some: "data"})
+```
+
+Create a new instance without the factory function:
+
+```ts
+import { Store } from "@corets/store"
+
+const store = new Store({some: "data"})
+```
+
+## `Store.get`
+
+Retrieve value from store:
+
+```ts
+store.get()
+```
+
+## `Store.set`
+
+Replace value in store:
+
+```ts
+store.set({ foo: "bar" })
+```
+
+## `Store.put`
+
+Add some values without replacing the initial state:
+
+```ts
+store.put({ some: "data" })
+```
+
+## `Store.reset`
+
+Reset store to the initial state that has been provided during its creation:
+
+```ts
+store.reset()
+```
+
+You can also reset with a new state:
+
+```ts
+store.reset({ other: "data" })
+```
+
+## `Store.listen`
+
+Listen to any changes:
+
+```ts
+store.listen((value) => console.log(value))
+```
