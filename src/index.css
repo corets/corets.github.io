@@ -14,9 +14,11 @@ h6:before {
   /*display: none !important;*/
   background: transparent !important;
 }
+
 [data-testid="header"] > div > a > svg {
   display: none !important;
 }
+
 [data-testid="header"] > div > div > div > a {
   /*background: #ced4de !important;*/
   display: none !important;

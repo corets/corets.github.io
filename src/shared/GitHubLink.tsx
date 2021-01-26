@@ -4,11 +4,10 @@ import styled from "@emotion/styled"
 const Root = styled.div`
   position: absolute;
   left: 20px;
-  top: 20px;
+  top: 11px;
 
   @media (max-width: 920px) {
     left: auto;
-    top: 11px;
     right: 90px;
   }
 
