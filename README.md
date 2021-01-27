@@ -1,8 +1,9 @@
 <p align="center"><a href="https://corets.github.io"><img src="https://corets.github.io/public/logo-github-readme.svg" width="300"/></a></p>
 
-<p align="center"><b><a href="https://corets.github.io">Documentation</a></b></p>
+<p align="center"><b><a href="https://corets.github.io">Documentation</a></b><br/><br/><br/></p>
+
+<p align="center">__DESCRIPTION__</p>
 
 # CoreTS
 
-This project serves as a central hub for the documentation of every package inside the `@corets` namespace.
-
+This project serves as a central hub for the documentation of every `@corets` package.
