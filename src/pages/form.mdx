@@ -601,7 +601,7 @@ form.put({ data2: "bar" })
 
 ## `Form.clear`
 
-Reset form values, errors, status indicators, etc. This will reset form values to the initial values (the one that you've passed into the [`createForm`](#createform) function):
+Reset form values, errors, status indicators, etc. This will reset form values to the initial values (the one that you've passed into the [`createForm()`](#createform) function):
 
 ```ts
 import { createForm } from "@corets/form"
@@ -974,7 +974,7 @@ const isSubmitted = form.isSubmitted()
 
 ## `Form.deps`
 
-Returns a list of *dependencies* for any specific field. This is useful whenever you need to calculate whether an input field should be re-rendered or not, for example inside [`useMemo`](https://reactjs.org/docs/hooks-reference.html#usememo), [`useCallback`](https://reactjs.org/docs/hooks-reference.html#usecallback) or even a [`useEffect`](https://reactjs.org/docs/hooks-reference.html#useeffect).
+Returns a list of *dependencies* for any specific field. This is useful whenever you need to calculate whether an input field should be re-rendered or not, for example inside [`useMemo()`](https://reactjs.org/docs/hooks-reference.html#usememo), [`useCallback()`](https://reactjs.org/docs/hooks-reference.html#usecallback) or even a [`useEffect()`](https://reactjs.org/docs/hooks-reference.html#useeffect).
 
 ```ts
 import { createForm } from "@corets/form"

@@ -9,7 +9,7 @@ import { Header } from "../shared/Header"
 
 # Schema
 
-This library provides an easy and powerful way to describe, validate and sanitize things like objects, arrays, strings numbers, dates and so on. It can be used for complex validation scenarios as well as simple one-line assertions.
+This library provides an easy and powerful way to describe, validate and sanitize things like objects, arrays, strings, numbers, dates and so on. It can be used for complex validation scenarios as well as simple one-line assertions.
 
 You can mix and match these kinds of schemas: [`object`](#object), [`string`](#string), [`number`](#number), [`array`](#array), [`boolean`](#boolean), [`date`](#date) and [`mixed`](#mixed)
 
@@ -174,7 +174,7 @@ string().or(() => string().numeric())
 string().also(() => string().numeric())
 ```
 
-**Note:** Given that schemas can be freely combined and defined at validation time, this means you can als do the same with sanitizers!
+**Note:** Given that schemas can be freely combined and defined at validation time, this means you can also do the same with sanitizers!
 
 ## Custom validations
 
@@ -383,7 +383,7 @@ Here is an example of how the error messages would look like:
 
 ## `Schema.sanitize`
 
-This method applies sanitizers returns the sanitized value:
+This method applies sanitizers and returns the sanitized value:
 
 ```ts
 import { string } from "@corets/schema"

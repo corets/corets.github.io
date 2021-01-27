@@ -215,7 +215,7 @@ Add translations, for all languages, using a merge:
 translator.addTranslations({ de: { key: "value" } })
 ```
 
-**Note:** Contrary to the [`Translator.setTranslations`](#translatorsettranslations) method, this one will not replace all translations but do a merge instead.
+**Note:** Contrary to the [`Translator.setTranslations()`](#translatorsettranslations) method, this one will not replace all translations but do a merge instead.
 
 ## `Translator.addTranslationsForLanguage`
 
@@ -225,7 +225,7 @@ Add translations, for a specific language, using a merge:
 translator.addTranslationsForLanguage("en", { key: "value" })
 ```
 
-**Note:** Contrary to the [`Translator.setTranslationsForLanguage`](#translatorsettranslationsforlanguage) method, this one will not replace all translations but do a merge instead.
+**Note:** Contrary to the [`Translator.setTranslationsForLanguage()`](#translatorsettranslationsforlanguage) method, this one will not replace all translations but do a merge instead.
 
 ## `Translator.get`
 
@@ -281,7 +281,7 @@ Retrieve translation with a custom formatter, interpolator and placeholder:
 translator.get("key", { formatter, interpolator, placeholder })
 ```
 
-**Note:** Read more [formatter](#custom-formatting), [interpolator](#custom-interpolations), and [placeholder](#custom-placeholder-for-missing-keys).
+**Note:** Read more about [formatter](#custom-formatting), [interpolator](#custom-interpolations), and [placeholder](#custom-placeholder-for-missing-keys).
 
 ## `Translator.has`
 
@@ -331,7 +331,7 @@ const t = translator.t("nested.key")
 t("~key")
 ```
 
-Method `Translator.t` as well as the translate function accept the same options as the [`Translator.get`](#translatorget) method.
+**Note:** Method `Translator.t` as well as the translate function accept the same options as the [`Translator.get()`](#translatorget) method.
 
 ## `Translator.listen`
 
