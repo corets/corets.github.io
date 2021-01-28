@@ -1,13 +1,8 @@
 ---
 name: Store
 route: /store
+repository: store
 ---
-
-import { Header } from "../shared/Header"
-
-<Header repository="store" />
-
-
 
 # Store
 
@@ -19,7 +14,7 @@ yarn add @corets/store
 
 ## React
 
-You can use stores inside React through this hooks based integration [@corets/use-store](/use-store).
+You can use stores inside React using this hooks based integration [@corets/use-store](/use-store).
 
 ## LocalStorage
 
@@ -33,7 +28,7 @@ Creates a new instance of `Store`:
 ```ts
 import { createStore } from "@corets/store"
 
-const store = createStore({some: "data"})
+const store = createStore({ some: "data" })
 ```
 
 Create a new instance without the factory function:
@@ -41,7 +36,16 @@ Create a new instance without the factory function:
 ```ts
 import { Store } from "@corets/store"
 
-const store = new Store({some: "data"})
+const store = new Store({ some: "data" })
+```
+
+Create a new instance with a custom differ:
+
+```ts
+import { createStore } from "@corets/store"
+
+const differ = (oldValue, newValue) => true
+const store = createStore({ some: "data" }, { differ })
 ```
 
 ## `Store.get`
@@ -68,24 +72,26 @@ Add some values without replacing the initial state:
 store.put({ some: "data" })
 ```
 
-## `Store.reset`
-
-Reset store to the initial state that has been provided during its creation:
-
-```ts
-store.reset()
-```
-
-You can also reset with a new state:
-
-```ts
-store.reset({ other: "data" })
-```
-
 ## `Store.listen`
 
 Listen to any changes:
 
 ```ts
 store.listen((value) => console.log(value))
+```
+
+Listen with a custom differ:
+
+```ts
+const differ = (oldValue, newValue) => true
+
+store.listen((value) => console.log(value), { differ })
+```
+
+Listen to a subset of data, using a custom mapper:
+
+```ts
+const mapper = {value} => ({ /* re-map parts of the store */ })
+
+store.listen((value) => console.log(value), { mapper })
 ```

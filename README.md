@@ -2,8 +2,4 @@
 
 <p align="center"><b><a href="https://corets.github.io">Documentation</a></b><br/><br/><br/></p>
 
-<p align="center">__DESCRIPTION__</p>
-
-# CoreTS
-
-This project serves as a central hub for the documentation of every `@corets` package.
+<p align="center">Central hub for documentation of **@corets** packages</p>

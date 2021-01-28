@@ -1,11 +1,8 @@
 ---
 name: Form
 route: /form
+repository: form
 ---
-
-import { Header } from "../shared/Header"
-
-<Header repository="form" />
 
 # Form
 
@@ -215,12 +212,12 @@ const Example = () => {
 
 ## Testing
 
-When writing unit tests, make sure that you set the [`debounceChanges`](#formconfig) config property to `0`. This will disable all the throttling of the state changes, and you will be able to write your tests in a synchronous manner.
+When writing unit tests, make sure that you set the [`debounce`](#formconfig) config property to `0`. This will disable all the throttling of the state changes, and you will be able to write your tests in a synchronous manner.
 
 ```ts
 import { createForm } from "@corets/form"
 
-const form = createForm().config({ debounceChanges: 0 })
+const form = createForm().config({ debounce: 0 })
 ```
 
 ## `createForm`
@@ -317,30 +314,17 @@ Alter form behaviour by providing custom configuration values:
 
 ```ts
 import { createForm } from "@corets/form"
-import { object } from "@corets/schema"
 
 const form = createForm()
   .config({
-    // runs sanitizers from coming from schema?
-    // this only applies to a complete validation, and not to the reactive one,
-    // where validation is run when a field has been changed
-    // (default: true)
+    // sanitize on form submit() and validate()? (default: true)
     sanitize: true,
-    // should form validate before submitting? (default: true)
-    validateOnSubmit: true,
-    // should run validation whenever a field changes?
-    // validates only the changed field, not the whole form (default: true)
-    validateOnChange: true,
-    // should validation be run only against the fields that have actually been changed? (default: false)
-    validateChangedFieldsOnly: false,
-    // delay notification of listeners (default: 10)
-    debounceChanges: 10,
-    // same as Form.validator() (default: undefined)
-    validator: async (form) => null,
-    // same as Form.schema()  (default: undefined)
-    schema: object(),
-    // same as Form.handler()  (default: undefined)
-    handler: async (form) => null,
+    // validate on form submit()? (default: true)
+    validate: true,
+    // validate and sanitize fields immediately after a change? (default: true)
+    reactive: true,
+    // delay invocation of listeners after a change (default: 10)
+    debounce: 10,
   })
 ```
 
@@ -456,28 +440,22 @@ You can access errors anytime later like this:
 const errors = form.getErrors()
 ```
 
-You can validate only those fields that have actually been changed (this can also be configured during the form creation):
+You can validate and sanitize only those fields that have actually been changed:
 
 ```ts
-const errors = await form.validate({ validateChangedFieldsOnly: true })
+const errors = await form.validate({ changed: true })
 ```
 
-Disable sanitization that might come from the attached schema object:
+You can disable sanitizing of values like this:
 
 ```ts
 const errors = await form.validate({ sanitize: false })
 ```
 
-If you decide to validate changed fields only, you can force validation to discard any previous errors:
+You can control whether you want to persist any possible errors or just do a dry run and simply return the validation result:
 
 ```ts
-const errors = await form.validate({ validateChangedFieldsOnly: true, keepPreviousErrors: false})
-```
-
-Just return validation errors, without actually persisting them on the form object:
-
-```ts
-const errors = await form.validate({ persistErrors: false })
+const errors = await form.validate({ persist: false })
 ```
 
 ## `Form.submit`
@@ -510,16 +488,22 @@ Access validation errors:
 const errors = form.getErrors()
 ```
 
-You can submit a form without validation like this:
+Submit without validation:
 
 ```ts
 const result = form.submit({ validate: false })
 ```
 
-Every option that you can pass to the [`Form.validate()`](#formvalidate) method, you can also pass to the [`Form.submit()`](#formsubmit):
+Submit without sanitization:
 
 ```ts
-const result = form.submit({ validateChangedFieldsOnly: true })
+const result = form.submit({ sanitize: false })
+```
+
+Submit, but validate and sanitize only changed fields:
+
+```ts
+const result = form.submit({ changed: true })
 ```
 
 ## `Form.listen`
@@ -529,12 +513,42 @@ Subscribe to any changes on the form object:
 ```ts
 import { createForm } from "@corets/form"
 
-const form = createForm(form)
+const form = createForm({})
 
 const unsubscribe = form.listen((form) => console.log("something has changed"))
 
 // unsubscribe from changes
 unsubscribe()
+```
+
+Invoke a listener immediately:
+
+```ts
+import { createForm } from "@corets/form"
+
+const form = createForm({})
+
+const unsubscribe = form.listen((form) => console.log("something has changed"), { immediate: true })
+```
+
+Set a custom debounce interval for listener:
+
+```ts
+import { createForm } from "@corets/form"
+
+const form = createForm({})
+
+const unsubscribe = form.listen((form) => console.log("something has changed"), { debounce: 100 })
+```
+
+Disable debounce for listener:
+
+```ts
+import { createForm } from "@corets/form"
+
+const form = createForm({})
+
+const unsubscribe = form.listen((form) => console.log("something has changed"), { debounce: 0 })
 ```
 
 ## `Form.get`
@@ -959,6 +973,19 @@ const isSubmitting = form.isSubmitting()
 
 **Note:** Form enters this state whenever you invoke the [`Form.submit()`](#formsubmit) method.
 
+## `Form.setSubmitting`
+
+Set form status to `submitting`:
+
+```ts
+import { createForm } from "@corets/form"
+
+const form = createForm()
+form.setSubmitting(true)
+```
+
+**Note:** Usually you don't have to do this manually.
+
 ## `Form.isSubmitted`
 
 Check if form has been successfully submitted at least once:
@@ -971,6 +998,20 @@ const isSubmitted = form.isSubmitted()
 ```
 
 **Note:** Form enters this state after a successful form submission, that did not cause any validation errors nor exception from the handler.
+
+
+## `Form.setSubmitted`
+
+Set form status to `submitted`:
+
+```ts
+import { createForm } from "@corets/form"
+
+const form = createForm()
+form.setSubmitted(true)
+```
+
+**Note:** Usually you don't have to do this manually.
 
 ## `Form.deps`
 

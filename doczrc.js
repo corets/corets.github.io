@@ -1,5 +1,8 @@
 export default {
-  themeConfig: { showDarkModeSwitch: false },
+  themesDir: "theme",
+  themeConfig: {
+    logo: "/public/logo.svg"
+  },
   typescript: true,
   ignore: ["README.md"],
   dest: "docs",
@@ -26,7 +29,7 @@ export default {
     "Use Query",
     "Use Debounced",
     "Use Form",
-    "Use FormBinder",
+    "Use Form Binder",
     "Use Translator",
     "Use Value",
     "Use Store",
