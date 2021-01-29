@@ -1,5 +1,7 @@
 import React from "react"
-import styled from "styled-components"
+import styled from "@emotion/styled"
+
+import image from "../../public/logo-text.svg"
 
 const Root = styled.div`
   margin: 50px 0px;
@@ -16,7 +18,7 @@ const Root = styled.div`
 export const Landing = () => {
   return (
     <Root>
-      <img src="/public/logo-text.svg" />
+      <img src={image} />
 
       <p>
         Central hub for <b>@corets</b> packages

@@ -1,7 +1,7 @@
 import React from "react"
 import favicon from "../../../public/favicon.png"
 import { Helmet } from "react-helmet-async"
-import styled  from "styled-components"
+import styled from '@emotion/styled'
 
 const Root = styled.div `
   display: flex;
@@ -16,6 +16,7 @@ const Wrapper = ({ children }) => {
     <Root>
       <Helmet>
         <link rel="icon" type="image/png" href={ favicon }/>
+        <meta property="og:image" content="/public/logo-text.png"/>
       </Helmet>
       { children }
     </Root>

@@ -13,6 +13,7 @@
   "dependencies": {
     "@corets/use-debounced": "^0.0.1-0",
     "@emotion/react": "^11.1.4",
+    "@emotion/styled": "^11.0.0",
     "algoliasearch": "^3.35.1",
     "dayjs": "^1.10.2",
     "docz": "^2.3.1",

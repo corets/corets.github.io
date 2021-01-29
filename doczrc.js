@@ -1,8 +1,5 @@
 export default {
   themesDir: "theme",
-  themeConfig: {
-    logo: "/public/logo.svg"
-  },
   typescript: true,
   ignore: ["README.md"],
   dest: "docs",

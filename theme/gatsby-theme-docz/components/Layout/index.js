@@ -7,7 +7,7 @@ import { Header } from '../Header'
 import { Sidebar } from '../Sidebar'
 import { MainContainer } from '../MainContainer'
 import * as styles from './styles'
-import styled from 'styled-components'
+import styled from '@emotion/styled'
 
 const MainContainerWrapper = styled.div `
   margin-top: 100px;
