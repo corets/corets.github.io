@@ -11,6 +11,7 @@ import styled from 'styled-components'
 
 const MainContainerWrapper = styled.div `
   margin-top: 100px;
+  overflow-x: hidden;
 `
 
 export const Layout = ({ children }) => {

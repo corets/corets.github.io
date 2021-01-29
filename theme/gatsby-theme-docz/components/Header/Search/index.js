@@ -50,6 +50,7 @@ export const NavSearch = ({ collapse, hitsAsGrid }) => {
     process.env.GATSBY_ALGOLIA_SEARCH_KEY
   )
   useClickOutside(ref, () => setFocus(false))
+
   return (
     <InstantSearch
       searchClient={searchClient}
@@ -57,7 +58,7 @@ export const NavSearch = ({ collapse, hitsAsGrid }) => {
       onSearchStateChange={({ query }) => setQuery(query)}
     >
       <div style={styles.wrapper} ref={ref}>
-        <Input onFocus={() => setFocus(true)} {...{ collapse, focus }} />
+        <Input setFocus={setFocus} {...{ collapse, focus }} focused={focus} />
         <HitsWrapper show={query.length > 0 && focus} asGrid={hitsAsGrid}>
           {indices.map(({ name, title, hitComp }) => (
             <Index key={name} indexName={name}>

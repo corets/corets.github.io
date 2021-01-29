@@ -19,9 +19,9 @@ export const Sidebar = forwardRef(function Sidebar(props, ref) {
     setQuery(ev.target.value)
   }
   useEffect(() => {
-    if (ref.current && currentDocRef.current) {
-      ref.current.scrollTo(0, currentDocRef.current.offsetTop)
-    }
+    // if (ref.current && currentDocRef.current) {
+    //   ref.current.scrollTo(0, currentDocRef.current.offsetTop)
+    // }
   }, [])
   return (
     <Fragment>

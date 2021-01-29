@@ -2,4 +2,4 @@
 
 <p align="center"><b><a href="https://corets.github.io">Documentation</a></b><br/><br/><br/></p>
 
-<p align="center">Central hub for documentation of <b>@corets</b> packages</p>
+<p align="center">Central hub for <b>@corets</b> packages</p>

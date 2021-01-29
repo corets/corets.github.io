@@ -1,5 +1,4 @@
 import React from "react"
-import { Logo } from "./Logo"
 import styled from "styled-components"
 
 const Root = styled.div`
@@ -17,7 +16,7 @@ const Root = styled.div`
 export const Landing = () => {
   return (
     <Root>
-      <Logo />
+      <img src="/public/logo-text.svg" />
 
       <p>
         Central hub for <b>@corets</b> packages

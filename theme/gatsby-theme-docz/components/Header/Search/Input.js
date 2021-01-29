@@ -3,11 +3,12 @@ import { connectSearchBox } from "react-instantsearch-dom"
 import { Form, Input, SearchIcon } from "./primitives"
 import { useDebounced } from "@corets/use-debounced"
 
-export default connectSearchBox(({ refine, ...rest }) => {
+export default connectSearchBox(({ refine, focused, setFocus, ...rest }) => {
   const ref = useRef()
 
   const focusInput = () => {
     if (ref.current) {
+      setFocus(true)
       ref.current.focus()
     }
   }
@@ -20,7 +21,7 @@ export default connectSearchBox(({ refine, ...rest }) => {
   }, [debouncedValue])
 
   return (
-    <Form onClick={() => focusInput()}>
+    <Form className={focused && 'focused'} onClick={() => focusInput()}>
       <SearchIcon size={ 20 }/>
 
       <Input

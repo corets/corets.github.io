@@ -2,9 +2,9 @@ import * as mixins from '~utils/mixins'
 import { media } from '~theme/breakpoints'
 
 export const wrapper = {
-  bg: 'header.bg',
   position: 'relative',
   zIndex: 1,
+  height: 1
 }
 
 export const innerContainer = {
@@ -12,21 +12,22 @@ export const innerContainer = {
   px: 4,
   position: 'relative',
   justifyContent: 'space-between',
-  height: 0
+  height: 0,
 }
 
 export const menuIcon = {
   display: 'none',
   position: 'fixed',
-  top: 20,
-  left: 20,
-  width: 30,
-  height: 30,
+  top: 15,
+  left: 15,
+  width: 40,
+  height: 40,
   background: 'white',
   alignItems: 'center',
   justifyContent: 'center',
   cursor: 'pointer',
   borderRadius: 5,
+  zIndex: 10,
   [media.tablet]: {
     display: 'flex',
   },

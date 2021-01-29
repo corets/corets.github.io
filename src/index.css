@@ -4,10 +4,7 @@
 .main-content h5:before,
 .main-content h6:before {
   content: "# ";
-}
-
-.main-content strong {
-  /*text-decoration: underline;*/
+  white-space: nowrap;
 }
 
 .main-content p code {
@@ -15,4 +12,7 @@
   line-height: inherit;
   padding: 3px 6px;
   border-radius: 4px;
+}
+
+.code-wrapper {
 }

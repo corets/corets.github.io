@@ -1,7 +1,6 @@
 import { media } from '~theme/breakpoints'
 
 export const container = {
-  backgroundColor: 'background',
   position: 'relative',
   width: 900,
   maxWidth: 'calc(100vw - 250px)',

@@ -4,10 +4,13 @@ import styled from "@emotion/styled"
 const Root = styled.div`
   display: flex;
   //justify-content: center;
+  margin-bottom: 20px;
 
   img {
-    border-radius: 10px;
-    box-shadow: 3px 3px 5px #aaa;
+    width: 100%;
+    height: auto;
+    border-radius: 5px;
+    box-shadow: 0px 0px 3px #ddd;
   }
 `
 

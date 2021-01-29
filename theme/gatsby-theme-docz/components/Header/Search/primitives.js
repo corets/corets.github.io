@@ -57,19 +57,25 @@ export const Input = styled.input`
   font-size: 1em;
   background: transparent;
   transition: ${props => props.theme.shortTrans};
-  border-radius: ${props => props.theme.smallBorderRadius};
+  border-radius: 0px;
   ${props => (props.collapse ? collapse : expand)};
   border-bottom: 1px solid #ced4de;
   padding: 5px 0px;
   margin: 0px;
   width: 0px;
-  transition: width 0.2s;
   font-size: 16px;
   color: #67778a;
   font-family: 'Source Sans Pro', sans-serif;
-  &:focus {
+  width: 0px;
+  //transition: width 0.2s;
+  
+  .focused & {
     width: 300px;
-    transition: width 0.2s;
+    //transition: width 0.2s;
+
+    @media (max-width: 920px) {
+      width: calc(100vw - 55px);
+    }
   }
   
   ::placeholder {
@@ -81,20 +87,28 @@ export const Input = styled.input`
 `
 
 export const Form = styled.form`
-  position: relative;
-  top: 0px;
   display: flex;
   flex-direction: row-reverse;
   align-items: center;
   height: 25px;
   cursor: pointer;
   background: white;
-  z-index: 1;
+  z-index: 99;
+  
+  @media(max-width: 920px) {
+    &.focused {
+      position: sticky;
+      width: calc(100vw - 57px);
+      left: 0px;
+      right: 0px;
+      transition: width 0.2s;
+    }
+  }
 `
 
 export const HitsWrapper = styled.div`
   display: ${props => (props.show ? `grid` : `none`)};
-  right: 0px;
+  //right: 0px;
   max-height: 80vh;
   overflow: scroll;
   z-index: 2;
@@ -109,6 +123,15 @@ export const HitsWrapper = styled.div`
   border-radius: 5px;
   border: 1px solid #ced4de;
   font-size: 16px;
+  box-sizing: border-box;
+  z-index: 99;
+  
+  @media(max-width: 920px) {
+    border-radius: 2px;
+    min-width: calc(100vw - 55px);
+    box-shadow: 0px 0px 3px #ddd;
+    left: 0px;
+  }
   
   li + li {
     margin-top: 10px;

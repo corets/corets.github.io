@@ -48,7 +48,7 @@ export const NavLink = forwardRef(function NavLink({ item, ...props }, ref) {
             key={heading.slug}
             to={`${to}#${heading.slug}`}
             sx={styles.smallLink}
-            className={currentHash === `#${heading.slug}` ? 'active' : ''}
+            className={currentHash === `#${heading.slug}` ? '' : ''}
           >
             {heading.value}
           </Link>

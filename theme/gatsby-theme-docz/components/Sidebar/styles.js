@@ -44,6 +44,7 @@ export const wrapper = ({ open }) => ({
     left: 0,
     bottom: 0,
     width: 400,
+    maxWidth: '80vw',
     px: 4,
     bg: 'background',
     transition: 'transform .2s ease-out',
