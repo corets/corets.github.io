@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from "react"
 import { connectSearchBox } from "react-instantsearch-dom"
 import { Form, Input, SearchIcon } from "./primitives"
-import { useDebounced } from "@corets/use-debounced"
+import { useDebounce } from "@corets/use-debounce"
 
 export default connectSearchBox(({ refine, focused, setFocus, ...rest }) => {
   const ref = useRef()
@@ -14,7 +14,7 @@ export default connectSearchBox(({ refine, focused, setFocus, ...rest }) => {
   }
 
   const [value, setValue] = useState('')
-  const debouncedValue = useDebounced(value, 300)
+  const debouncedValue = useDebounce(value, 300)
 
   useEffect(() => {
     refine(debouncedValue)

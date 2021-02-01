@@ -1,0 +1,34 @@
+---
+name: Use Previous
+route: /use-previous
+repository: use-previous
+---
+
+# Use Previous
+
+Track previous versions of values.
+
+```bash
+yarn add @corets/use-previous
+```
+
+## `usePrevious`
+
+Get a previous version of a value:
+
+```tsx
+import React, { useState } from "react"
+import { usePrevious } from "@corets/use-previous"
+
+const Example = () => {
+  const [count, setCount] = useState(0)
+  const previousCount = usePrevious(count)
+
+  return (
+    <div>
+      <div>count: {count}</div>
+      <div>previous count: {previousCount}</div>
+    </div>
+  )
+}
+```

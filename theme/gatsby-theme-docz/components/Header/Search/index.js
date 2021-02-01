@@ -7,13 +7,17 @@ import {
 } from 'react-instantsearch-dom'
 import algoliasearch from 'algoliasearch/lite'
 import * as styles from '../../NavSearch/styles'
-import { Root, HitsWrapper, PoweredBy } from './primitives'
+import { HitsWrapper } from './primitives'
 import Input from './Input'
 import * as hitComps from './hitComps'
 
 const Results = connectStateResults(
   ({ searchState: state, searchResults: res, children }) =>
-    res && res.nbHits > 0 ? children : `No results for '${state.query}'`
+    res && res.nbHits > 0 ? children : (
+      <div>
+        No results for <b>{state.query}</b>
+      </div>
+    )
 )
 
 const Stats = connectStateResults(

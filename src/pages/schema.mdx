@@ -1069,9 +1069,9 @@ Similar to [`string.timeBetween()`](#stringtimebetween), but allows dates to be 
 ```ts
 import { string } from "@corets/schema"
 
-string().dateBetweenOrSame(new Date(), new Date())
-string().dateBetweenOrSame(new Date(), new Date(), "Message")
-string().dateBetweenOrSame(() => new Date(), () => new Date(), () => "Message")
+string().timeBetweenOrSame("10:00", "15:00")
+string().timeBetweenOrSame("10:00", "15:00", "Message")
+string().timeBetweenOrSame(() => "10:00", () => "15:00", () => "Message")
 ```
 
 ## `string.dateTime`

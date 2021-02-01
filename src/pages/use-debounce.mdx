@@ -1,0 +1,70 @@
+---
+name: Use Debounce
+route: /use-debounce
+repository: use-debounce
+---
+
+# Use Debounce
+
+Create a debounced version of a specific value or a function.
+
+```bash
+yarn add @corets/use-debounce
+```
+
+## `useDebounce`
+
+This hook is built on top of lodash's [`debounce()`](https://lodash.com/docs/4.17.15#debounce) and accepts the same arguments.
+
+In this example we are creating a debounced version of an existing value:
+
+```tsx
+import React, { useState, useEffect } from "react"
+import { useDebounce } from "@corets/use-debounce"
+
+const Example = () => {
+  const [input, setInput] = useState("")
+  const debouncedInput = useDebounce(input, 300)
+
+  const handleSearch = () => {
+    // fetch some data based on input...
+  }
+
+  const handleChange = (e) => setInput(e.target.value)
+
+  // react to changes of the debounced input
+  useEffect(handleSearch, [debouncedInput])
+
+  return (
+    <input type="text" onChange={handleChange} />
+  )
+}
+```
+
+In this example we are creating a debounced version of a function:
+
+```tsx
+import React, { useState, useEffect } from "react"
+import { useDebounce } from "@corets/use-debounce"
+
+const Example = () => {
+  const [input, setInput] = useState("")
+  const handleSearch = useDebounce((query: string) => {
+    // you can also access variable "input" directly, if you want to
+    // fetch some data based on input...
+  }, 300)
+
+  const handleChange = (e) => {
+    setInput(e.target.value)
+    // trigger search immediately, this call will be debounced
+    handleSearch(e.target.value)
+  }
+
+
+  return (
+    <input type="text" onChange={handleChange} />
+  )
+}
+```
+
+**Note:** This hook accepts a third `options` argument identical to the one expected by lodash's [`debounce()`](https://lodash.com/docs/4.17.15#debounce) function.

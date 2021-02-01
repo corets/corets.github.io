@@ -17,6 +17,14 @@ const Wrapper = ({ children }) => {
       <Helmet>
         <link rel="icon" type="image/png" href={ favicon }/>
         <meta property="og:image" content="/public/logo-text.png"/>
+        <script async src="https://www.googletagmanager.com/gtag/js?id=G-WQKYRNHMNW"/>
+        <script>{`
+        window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+
+          gtag('config', 'G-WQKYRNHMNW');
+        `}</script>
       </Helmet>
       { children }
     </Root>
