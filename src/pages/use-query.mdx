@@ -12,30 +12,72 @@ Convenient hooks for url query segments, built for [`react-router`](https://reac
 yarn add @corets/use-query
 ```
 
-## `useQuery`
+## Quick Start
 
-Hook into any query param you want, right inside your React component:
+Hook into URL query and update it easily from withing your component:
 
 ```tsx
 import React from "react"
 import { useQuery } from "@corets/use-query"
 
 const Example = () => {
-  const [query, setQuery] = useQuery({
+  const query = useQuery({
     page: 1,
     order: "asc"
   })
 
-  const handleGoToNextPage = () => setQuery({ page: query.page + 1 })
-  const handleToggleSort = () => setQuery({ order: query.order === "asc" ? "desc" : "asc" })
+  // update page and also reset order to the initial value "asc"
+  const handleGoToNextPage = () => query.set({ page: query.page + 1 })
+  // update order, but keep page as is
+  const handleToggleSort = () => query.put({ order: query.order === "asc" ? "desc" : "asc" })
 
   return (
     <div>
-      <div>Page: {query.page}</div>
-      <div>Order: {query.order}</div>
+      <div>Page: {query.get().page}</div>
+      <div>Order: {query.get().order}</div>
       <button onClick={handleGoToNextPage}>Go to next page</button>
       <button onClick={handleToggleSort}>Change sorting order</button>
     </div>
   )
 }
+```
+
+## `useQuery`
+
+Create a query object to control all the query parameters, returns an instance of [`Query`](#queryget):
+
+```tsx
+const query = useQuery({ some: "value" })
+```
+
+**Note:** It accepts an object with initial values.
+
+By default, parameters like `""`, `null`, `undefined`, `0` and `"0"` are stripped, the default value will be used instead. Updating query with one of those values won't change anything. You can alter this behaviour by providing a second argument, overriding values that should be stripped away:
+
+```ts
+const query = useQuery({ some: "value" }, ["", null, undefined])
+```
+
+## `Query.get`
+
+Returns all query parameters:
+
+```ts
+query.get()
+```
+
+## `Query.set`
+
+Replace all query parameters with the new ones:
+
+```ts
+query.set({ some: "value" })
+```
+
+## `Query.put`
+
+Override some query parameters, without replacing all of them:
+
+```ts
+query.put({ some: "value" })
 ```
