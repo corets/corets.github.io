@@ -407,16 +407,16 @@ Invoking the validate method will result in a validation process where values ge
 import { createForm } from "@corets/form"
 import { object, string } from "@corets/schema"
 
-type MyForm = { data: string }
+type MyForm = { data: string, nested: { field: string } }
 
-const schema = object({
+const schema = object<MyForm>({
   data: string().min(2),
   nested: object({
     field: string().max(2)
   })
 })
 
-const form = createForm<MyForm>({ data: "foo" }).schema(schema)
+const form = createForm<MyForm>({ data: "foo", nested: { field: "" } }).schema(schema)
 
 const errors = await form.validate()
 
