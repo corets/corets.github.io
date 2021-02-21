@@ -172,3 +172,13 @@ const differ = (oldValue, newValue) => true
 
 list.listen(state => console.log(state), { differ })
 ```
+
+## `List.use`
+
+Returns value, and a setter function to update the list. This is a convenience method for people used to React's `useState` syntax.
+
+```ts
+import { createList } from "@corets/list"
+
+const [list, setList] = createList([1, 2]).use()
+```

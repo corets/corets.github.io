@@ -95,3 +95,13 @@ const mapper = {value} => ({ /* re-map parts of the store */ })
 
 store.listen((value) => console.log(value), { mapper })
 ```
+
+## `Store.use`
+
+Returns value, and a setter function to update the store. This is a convenience method for people used to React's `useState` syntax.
+
+```ts
+import { createStore } from "@corets/store"
+
+const [store, setStore] = createStore({ foo: "bar" }).use()
+```

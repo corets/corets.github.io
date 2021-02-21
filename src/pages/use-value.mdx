@@ -28,6 +28,9 @@ const Example = () => {
   const value2 = useValue(() => 0)
   const value3 = useValue(globalValue)
 
+  // alternative syntax
+  const [value, setValue] = useValue(globalValue).use()
+
   const increment = () => value1.set(value1.get() + 1)
 
   return <button onClick={increment}>Count: {value1.get()}</button>

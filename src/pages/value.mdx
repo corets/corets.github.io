@@ -85,3 +85,13 @@ const differ = (oldValue, newValue) => true
 
 value.listen((value) => console.log(value), { differ })
 ```
+
+## `Value.use`
+
+Returns value, and a setter function to update the underlying value. This is a convenience method for people used to React's `useState` syntax.
+
+```ts
+import { createValue } from "@corets/value"
+
+const [value, setValue] = createValue(1).use()
+```

@@ -28,6 +28,9 @@ const Example = () => {
   const list2 = useList(() => createList(["apples", "oranges"]))
   const list3 = useList(globalList)
 
+  // alternative syntax
+  const [list, setList] = useList(globalList).use()
+
   const addItem = () => list1.add("tomatoes")
 
   return (

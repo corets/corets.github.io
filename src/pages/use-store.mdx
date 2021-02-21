@@ -27,6 +27,9 @@ const Example = () => {
   const store1 = useStore(() => ({ count: 0 }))
   const store2 = useStore(globalStore)
 
+  // alternative syntax
+  const [store, setStore] = useStore(globalStore).use()
+
   const increment = () => store1.set({ count: store1.get().count + 1 })
 
   return (
