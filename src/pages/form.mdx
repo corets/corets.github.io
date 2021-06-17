@@ -141,12 +141,13 @@ Given the nature of modern frontend development, projects use various component 
 Here is an example of a very basic, vanilla text field binder:
 
 ```ts
+import { ObservableForm } from "@corets/form"
 
-const createBinder = (form) => ({
+const createBinder = (form: ObservableForm) => ({
   input: createInputBinder(form)
 })
 
-const createInputBinder = (form) => (path) => {
+const createInputBinder = (form: ObservableForm) => (path: string) => {
   return {
     name: path,
     value: form.getAt(path),
@@ -169,6 +170,40 @@ const Example = () => {
   const bind = createBinder(form)
 
   return <input {...bind.input("field")} />
+}
+```
+
+Another way to create a binder is using the [`Form.fields()`](#formfields) method powered by an `ObjectAccessor`. This way you no longer need to use dynamic, string base keys to map the fields, you can use a statically typed object instead:
+
+```ts
+import { ObservableFormField } from "@corets/form"
+
+const createBinder = () => ({
+  input: inputBinder
+})
+
+const inputBinder = (field: ObservableFormField) => {
+  return {
+    name: field.getKey(),
+    value: field.getValue(),
+    onChange: (e) => field.setValue(e.target.value),
+  }
+}
+```
+
+Now you can use that binder inside your React component:
+
+```tsx
+import React from "react"
+import { createForm } from "@corets/form"
+import { useForm } from "@corets/use-form"
+
+const Example = () => {
+  const form = useForm(() => createForm({ some: { nested: { field: "value" } } }))
+  const bind = createBinder(form)
+  const fields = form.fields()
+
+  return <input {...bind.input(fields.some.nested.field.get())} />
 }
 ```
 
@@ -321,7 +356,7 @@ const form = createForm()
     sanitize: true,
     // validate on form submit()? (default: true)
     validate: true,
-    // validate and sanitize fields immediately after a change? (default: true)
+    // validate fields immediately after a change? (default: true)
     reactive: true,
     // delay invocation of listeners after a change (default: 10)
     debounce: 10,
@@ -770,7 +805,7 @@ const isDirty = form.isDirty()
 
 **Note:** Works only for fields that have been set using the [`Form.setAt()`](#formsetat) method. Methods like [`Form.set()`](#formset) or [`Form.put()`](#formput) do not track this kind of changes.
 
-## `Form.isDirtyField`
+## `Form.isDirtyAt`
 
 Check if a specific field is dirty, using the dot notation:
 
@@ -778,10 +813,10 @@ Check if a specific field is dirty, using the dot notation:
 import { createForm } from "@corets/form"
 
 const form = createForm()
-const isDirty = form.isDirtyField("nested.field")
+const isDirty = form.isDirtyAt("nested.field")
 ```
 
-## `Form.getDirtyFields`
+## `Form.getDirty`
 
 Get a list of all dirty fields:
 
@@ -789,34 +824,22 @@ Get a list of all dirty fields:
 import { createForm } from "@corets/form"
 
 const form = createForm()
-const dirtyFields = form.getDirtyFields()
+const dirtyFields = form.getDirty()
 ```
 
-## `Form.setDirtyFields`
+## `Form.setDirtyAt`
 
-Replace all dirty fields:
+Add some dirty fields:
 
 ```ts
 import { createForm } from "@corets/form"
 
 const form = createForm()
 
-form.setDirtyFields(["field", "nested.field"])
+form.setDirtyAt(["field", "nested.field"])
 ```
 
-## `Form.addDirtyFields`
-
-Add some dirty fields through a merge:
-
-```ts
-import { createForm } from "@corets/form"
-
-const form = createForm()
-
-form.addDirtyFields(["nested.field"])
-```
-
-## `Form.clearDirtyFields`
+## `Form.clearDirty`
 
 Clear all dirty fields:
 
@@ -825,10 +848,10 @@ import { createForm } from "@corets/form"
 
 const form = createForm()
 
-form.clearDirtyFields()
+form.clearDirty()
 ```
 
-## `Form.clearDirtyField`
+## `Form.clearDirtyAt`
 
 Clear a specific dirty field:
 
@@ -837,7 +860,7 @@ import { createForm } from "@corets/form"
 
 const form = createForm()
 
-form.clearDirtyField("nested.field")
+form.clearDirtyAt("nested.field")
 ```
 
 ## `Form.isChanged`
@@ -853,7 +876,7 @@ const isChanged = form.isChanged()
 
 **Note:** Contrary to [`Form.isDirty()`](#formisdirty), for a field to be tracked as changed, it's value actually has to be different from its initial state provided during the form creation. This only works for fields that have been changed trough [`Form.setAt()`](#formsetat), methods like [`Form.set()`](#formset) and [`Form.put()`](#formput) do not track this kind of changes.
 
-## `Form.isChangedField`
+## `Form.isChangedAt`
 
 Check if a specific field has been changed:
 
@@ -861,10 +884,10 @@ Check if a specific field has been changed:
 import { createForm } from "@corets/form"
 
 const form = createForm()
-const isChanged = form.isChangedField("nested.field")
+const isChanged = form.isChangedAt("nested.field")
 ```
 
-## `Form.getChangedFields`
+## `Form.getChanged`
 
 Get all fields that have been changed:
 
@@ -872,34 +895,22 @@ Get all fields that have been changed:
 import { createForm } from "@corets/form"
 
 const form = createForm()
-const changedFields = form.getChangedFields()
+const changedFields = form.getChanged()
 ```
 
-## `Form.setChangedFields`
+## `Form.setChangedAt`
 
-Replace all changed fields:
+Add some changed fields:
 
 ```ts
 import { createForm } from "@corets/form"
 
 const form = createForm()
 
-form.setChangedFields(["field", "nested.field"])
+form.setChangedAt(["field", "nested.field"])
 ```
 
-## `Form.addChangedFields`
-
-Add some changed fields through a merge:
-
-```ts
-import { createForm } from "@corets/form"
-
-const form = createForm()
-
-form.addChangedFields(["field", "nested.field"])
-```
-
-## `Form.clearChangedFields`
+## `Form.clearChanged`
 
 Clear all changed fields:
 
@@ -908,10 +919,10 @@ import { createForm } from "@corets/form"
 
 const form = createForm()
 
-form.clearChangedFields()
+form.clearChanged()
 ```
 
-## `Form.clearChangedField`
+## `Form.clearChangedAt`
 
 Clear a specific changed field:
 
@@ -920,7 +931,7 @@ import { createForm } from "@corets/form"
 
 const form = createForm()
 
-form.clearChangedField("nested.field")
+form.clearChangedAt("nested.field")
 ```
 
 ## `Form.getResult`
@@ -1046,4 +1057,239 @@ form.deps("some.field", {
   // form result (default: true)
   result: true,
 })
+```
+
+## `Form.fields`
+
+Returns an accessor object that can be used to get a handle for an individual form field. Each form field is represented by an instance of `FormField`. The main purpose of this is to be able to statically access form fields, without having to rely on dynamic string based keys.
+
+```ts
+import { createForm } from "@corets/form"
+
+const form = createForm({ some: { nested: { field: "value" } } })
+const fields = form.fields()
+
+fields.some.nested.field.get().setValue("new value")
+// instead of
+form.setAt("some.nested.field", "new value")
+// or even
+form.setAt(fields.some.nested.field.key(), "new value")
+```
+
+Check out the [Accessor](/accessor) docs to learn more about the library used behind the scenes.
+
+## `FormField.getValue`
+
+Get field value:
+
+```ts
+import { createForm } from "@corets/form"
+
+const form = createForm({ some: { field: "value" } })
+const field = form.fields().some.field.get()
+
+field.getValue()
+// same as
+form.getAt("some.field")
+```
+
+## `FormField.setValue`
+
+Set field value:
+
+```ts
+import { createForm } from "@corets/form"
+
+const form = createForm({ some: { field: "value" } })
+const field = form.fields().some.field.get()
+
+field.setValue("new value")
+// same as
+form.getAt("some.field", "new value")
+```
+
+## `FormField.getKey`
+
+Get absolute field key:
+
+```ts
+import { createForm } from "@corets/form"
+
+const form = createForm({ some: { field: "value" } })
+const field = form.fields().some.field.get()
+
+field.getKey()
+```
+
+## `FormField.getErrors`
+
+Get errors for that particular field:
+
+```ts
+import { createForm } from "@corets/form"
+
+const form = createForm({ some: { field: "value" } })
+const field = form.fields().some.field.get()
+
+field.getErrors()
+// same as
+form.getErrorsAt("some.field")
+```
+
+## `FormField.setErrors`
+
+Set errors for that particular field, by overriding the previous ones:
+
+```ts
+import { createForm } from "@corets/form"
+
+const form = createForm({ some: { field: "value" } })
+const field = form.fields().some.field.get()
+
+field.setErrors("new error")
+// same as
+form.setErrorsAt("some.field", "new error")
+```
+
+## `FormField.hasErrors`
+
+Check if there are any errors for that particular field:
+
+```ts
+import { createForm } from "@corets/form"
+
+const form = createForm({ some: { field: "value" } })
+const field = form.fields().some.field.get()
+
+field.hasErrors()
+// same as
+form.hasErrorsAt("some.field")
+```
+
+## `FormField.addErrors`
+
+Add errors for that particular field:
+
+```ts
+import { createForm } from "@corets/form"
+
+const form = createForm({ some: { field: "value" } })
+const field = form.fields().some.field.get()
+
+field.addErrors("new error")
+// same as
+form.addErrorsAt("some.field", "new error")
+```
+
+## `FormField.clearErrors`
+
+Clear errors for that particular field:
+
+```ts
+import { createForm } from "@corets/form"
+
+const form = createForm({ some: { field: "value" } })
+const field = form.fields().some.field.get()
+
+field.clearErrors()
+// same as
+form.clearErrorsAt("some.field")
+```
+
+## `FormField.isDirty`
+
+Check if a particular field is dirty:
+
+```ts
+import { createForm } from "@corets/form"
+
+const form = createForm({ some: { field: "value" } })
+const field = form.fields().some.field.get()
+
+field.isDirty()
+// same as
+form.isDirtyAt("some.field")
+```
+
+## `FormField.setDirty`
+
+Set dirty status of a particular field:
+
+```ts
+import { createForm } from "@corets/form"
+
+const form = createForm({ some: { field: "value" } })
+const field = form.fields().some.field.get()
+
+field.setDirty()
+// same as
+form.setDirtyAt("some.field")
+```
+
+## `FormField.clearDirty`
+
+Clear dirty status of a particular field:
+
+```ts
+import { createForm } from "@corets/form"
+
+const form = createForm({ some: { field: "value" } })
+const field = form.fields().some.field.get()
+
+field.clearDirty()
+// same as
+form.clearDirtyAt("some.field")
+```
+
+## `FormField.isChanged`
+
+Check if a particular field is changed:
+
+```ts
+import { createForm } from "@corets/form"
+
+const form = createForm({ some: { field: "value" } })
+const field = form.fields().some.field.get()
+
+field.isChanged()
+// same as
+form.isChangedAt("some.field")
+```
+
+## `FormField.setChanged`
+
+Set changed status of a particular field:
+
+```ts
+import { createForm } from "@corets/form"
+
+const form = createForm({ some: { field: "value" } })
+const field = form.fields().some.field.get()
+
+field.setChanged()
+// same as
+form.setChangedAt("some.field")
+```
+
+## `FormField.clearChanged`
+
+Clear changed status of a particular field:
+
+```ts
+import { createForm } from "@corets/form"
+
+const form = createForm({ some: { field: "value" } })
+const field = form.fields().some.field.get()
+
+field.clearChanged()
+// same as
+form.clearChangedAt("some.field")
+```
+
+## `FormField.getForm`
+
+Get the initial `Form` instance attached to this field.
+
+```ts
+const form = field.getForm()
 ```

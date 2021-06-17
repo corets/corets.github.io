@@ -233,14 +233,14 @@ const sanitizedValue = string().map(customSanitizer).sanitize(1234)
 
 ## Translations
 
-This library uses the [@corets/translator](/translator) package for translations.
+This library uses the [i18next](https://github.com/i18next/i18next) package for translations.
 
 You can change the default translator language like this:
 
 ```ts
 import { schemaTranslator } from "@corets/schema"
 
-schemaTranslator.setLanguage("en")
+schemaTranslator.changeLanguage("en")
 ```
 
 You can also request a specific language during validation like this:
@@ -259,10 +259,10 @@ Get a full list of all translations:
 ```ts
 import { schemaTranslator } from "@corets/schema"
 
-console.log(schemaTranslator.getTranslations())
+console.log(schema.schemaTranslator.getResourceBundle("en"))
 ```
 
-**Note:** You can also find the whole list [here](https://github.com/corets/schema/tree/master/src/locales). For further examples on how to replace translations, add new languages and so on, please have a look at the [@corets/translator](/translator) docs.
+**Note:** You can also find the whole list [here](https://github.com/corets/schema/tree/master/src/locales). For further examples on how to replace translations, add new languages and so on, please have a look at the [i18next](https://github.com/i18next/i18next) docs.
 
 ## `Schema.test`
 

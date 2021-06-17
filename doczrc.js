@@ -13,9 +13,12 @@ export default {
 
     "Form",
     "Schema",
+    "Fiber",
+
     "Translator",
 
     "Tag",
+    "Accessor",
 
     "Value",
     "Store",
