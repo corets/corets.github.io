@@ -24,7 +24,7 @@ const makeResponse = (status: number, result: any) => {
 }
 
 const pingPong = (input: string) => {
-  return input === "ping" ? "pong" : "ping"
+  return makeResponse(200, input === "ping" ? "pong" : "ping")
 }
 
 export const fiber = createFiber({ pingPong })
