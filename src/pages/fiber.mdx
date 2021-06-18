@@ -39,7 +39,7 @@ import { fiber } from "./fiber"
 
 const app = express()
 
-app.post("/fiber:method", async (req, res) => {
+app.post("/fiber/:method", async (req, res) => {
   try {
     const method = req.params?.method
     const args = Object.values(req?.body)
@@ -62,7 +62,7 @@ import { createFiberClient } from "@corets/fiber"
 import axios from "axios"
 import type { MyFiber } from "./fiber"
 
-const client = createFiberClient<MyFiber>(async (method, ...args) => {
+export const client = createFiberClient<MyFiber>(async (method, ...args) => {
   const res = await axios.post(`http://localhost:1337/fiber/${method}`, args)
 
   return res.data
