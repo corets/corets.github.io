@@ -1304,6 +1304,30 @@ number().integer("Message")
 number().integer(() => "Message")
 ```
 
+## `number.oneOf`
+
+Number must be one of the whitelisted values:
+
+```ts
+import { number } from "@corets/schema"
+
+number().oneOf([10, 20])
+number().oneOf([10, 20], "Message")
+number().oneOf(() => [10, 20], () => "Message")
+```
+
+## `number.noneOf`
+
+Number must not be one of the blacklisted values:
+
+```ts
+import { number } from "@corets/schema"
+
+number().noneOf([10, 20])
+number().noneOf([10, 20], "Message")
+number().noneOf(() => [10, 20], () => "Message")
+```
+
 ## `number.toDefault`
 
 Default value in case the underlying value is not a number:
