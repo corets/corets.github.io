@@ -14,7 +14,7 @@ yarn add @corets/use-async
 
 ## `useAsync`
 
-Function `useAsync` takes any other function that returns anything that can be *awaited* and returns its result as soon as the promise resolves. You also get some useful things like a `loading` indicator, the possible `error` that might have been thrown / or occurred through rejection and a `reload` function to rerun the async procedure. Async action can also be canceled with `cancel` or resolved directly using `resolve`.
+Function `useAsync` takes any other function that returns anything that can be *awaited* and returns its result as soon as the promise resolves. You also get some useful things like a `loading` indicator, the possible `error` that might have been thrown / or occurred through rejection, a `reload` function to rerun the async procedure and a `refresh` function that can be used to trigger a *silent* reload (without changing loading status and not disposing previous result until a new one has been loaded). Async action can also be canceled with `cancel` or resolved directly using `resolve`.
 
 ```tsx
 import React from "react"
@@ -39,7 +39,9 @@ const Example = () => {
   }
 
   const handleReload = () => handle.reload()
+  const handleRefresh = () => handle.refresh()
   const handleReloadWithOverride = () => handle.reload(() => fetchCommodityPrice("silver"))
+  const handleRefreshWithOverride = () => handle.refresh(() => fetchCommodityPrice("silver"))
   const handleResolve = () => handle.resolve("Platinum: 99999$")
   const handleCancel = () => handle.cancel()
 
@@ -47,7 +49,9 @@ const Example = () => {
     <div>
       <span>{handle.result}</span>
       <button onClick={handleReload}>reload</button>
+      <button onClick={handleRefresh}>reload silently</button>
       <button onClick={handleReloadWithOverride}>override reload</button>
+      <button onClick={handleRefreshWithOverride}>override and reload silently</button>
       <button onClick={handleResolve}>resolve immediately</button>
       <button onClick={handleCancel}>cancel</button>
     </div>
