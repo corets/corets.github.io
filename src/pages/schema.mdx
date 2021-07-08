@@ -233,14 +233,14 @@ const sanitizedValue = string().map(customSanitizer).sanitize(1234)
 
 ## Translations
 
-This library uses the [i18next](https://github.com/i18next/i18next) package for translations.
+This library uses the [@corets/translator](https://corets.github.io/translator) package for translations.
 
-You can change the default translator language like this:
+You can change default language like this:
 
 ```ts
 import { schemaTranslator } from "@corets/schema"
 
-schemaTranslator.changeLanguage("en")
+schemaTranslator.setLanguage("en")
 ```
 
 You can also request a specific language during validation like this:
@@ -259,10 +259,10 @@ Get a full list of all translations:
 ```ts
 import { schemaTranslator } from "@corets/schema"
 
-console.log(schema.schemaTranslator.getResourceBundle("en"))
+console.log(schemaTranslator.getTranslations())
 ```
 
-**Note:** You can also find the whole list [here](https://github.com/corets/schema/tree/master/src/locales). For further examples on how to replace translations, add new languages and so on, please have a look at the [i18next](https://github.com/i18next/i18next) docs.
+**Note:** You can also find the whole list [here](https://github.com/corets/schema/tree/master/src/locales). For further examples on how to replace translations, add new languages and so on, please have a look at the [@corets/translator](https://corets.github.io/translator) docs.
 
 ## `Schema.test`
 
@@ -521,16 +521,16 @@ Logically connects multiple schemas, or a custom validation function to the sche
 
 Attaches a custom sanitizer function to the schema. Have a look at [custom sanitizers](#custom-sanitizers) for more details.
 
-## `value`
+## `shape`
 
 This schema is different from the others since it does not provide any validation nor sanitization methods itself. It is a convenient method to define a new schema starting with the default value. Use it as an entry point for any other kind of schema.
 
 Example of a schema where we start by defining the default value first:
 
 ```ts
-import { value } from "@corets/schema"
+import { shape } from "@corets/schema"
 
-const schema = value("foo").string()
+const schema = shape("foo").string()
 ```
 
 The example above is equivalent to this:
@@ -543,74 +543,74 @@ const schema = string().toDefault("foo")
 
 **Note:** Defining a default value is totally optional, but might be very useful, since you can use the [`Schema.sanitize`](#schemasanitize) to prefill a value with some default data - think *forms*.
 
-## `value.string`
+## `shape.string`
 
 Create a new [`string`](#string) schema starting with the default value:
 
 ```ts
-import { value } from "@corets/schema"
+import { shape } from "@corets/schema"
 
-value("foo").string()
+shape("foo").string()
 ```
 
-## `value.number`
+## `shape.number`
 
 Create a new [`number`](#number) schema starting with the default value:
 
 ```ts
-import { value } from "@corets/schema"
+import { shape } from "@corets/schema"
 
-value("foo").number()
+shape("foo").number()
 ```
 
-## `value.boolean`
+## `shape.boolean`
 
 Create a new [`boolean`](#boolean) schema starting with the default value:
 
 ```ts
-import { value } from "@corets/schema"
+import { shape } from "@corets/schema"
 
-value("foo").boolean()
+shape("foo").boolean()
 ```
 
-## `value.date`
+## `shape.date`
 
 Create a new [`date`](#date) schema starting with the default value:
 
 ```ts
-import { value } from "@corets/schema"
+import { shape } from "@corets/schema"
 
-value("foo").date()
+shape("foo").date()
 ```
 
-## `value.array`
+## `shape.array`
 
 Create a new [`array`](#array) schema starting with the default value:
 
 ```ts
-import { value } from "@corets/schema"
+import { shape } from "@corets/schema"
 
-value("foo").array()
+shape("foo").array()
 ```
 
-## `value.object`
+## `shape.object`
 
 Create a new [`object`](#object) schema starting with the default value:
 
 ```ts
-import { value } from "@corets/schema"
+import { shape } from "@corets/schema"
 
-value("foo").object()
+shape("foo").object()
 ```
 
-## `value.mixed`
+## `shape.mixed`
 
 Create a new [`mixed`](#mixed) schema starting with the default value:
 
 ```ts
-import { value } from "@corets/schema"
+import { shape } from "@corets/schema"
 
-value("foo").mixed()
+shape("foo").mixed()
 ```
 
 ## `string`

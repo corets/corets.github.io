@@ -8,6 +8,10 @@ repository: translator
 
 Simple translation library that works everywhere.
 
+- Works for server side and client side translations handling
+- [Static translations access](#createTranslatorAccessor) - **no need for string based keys**
+- Hackable and extendable
+
 ```bash
 yarn add @corets/translator
 ```
@@ -15,6 +19,8 @@ yarn add @corets/translator
 ## React
 
 Before you can start using this library inside React, you have to add the [@corets/use-translator](/use-translator) package first. It provides a seamless integration through a hooks based API.
+
+
 
 ## Custom interpolations
 
@@ -24,7 +30,7 @@ Provide a custom interpolation function, that is replacing placeholders with rep
 import { createTranslator } from "@corets/translator"
 
 const customInterpolator = (text: string, match: string, replacement: any) => {
-  return text.replace(`{ ${match} }`, replacement)
+  return text.replace(`[[${match}]]`, replacement)
 }
 
 const translator = createTranslator({}, { interpolator: customInterpolator })
@@ -35,7 +41,7 @@ const translator = createTranslator({}, { interpolator: customInterpolator })
 Provide a custom formatter function, that formats replacements:
 
 ```ts
-import { createTranslator, formatter } from "@corets/translator"
+import { createTranslator, defaultTranslatorFormatter } from "@corets/translator"
 import dayjs from "dayjs"
 
 const customFormatter = (language: string, replacement: any, replacements: object) => {
@@ -47,7 +53,7 @@ const customFormatter = (language: string, replacement: any, replacements: objec
   }
 
   // fallback to default behaviour
-  return formatter(language, replacement, replacements)
+  return defaultTranslatorFormatter(language, replacement, replacements)
 }
 
 const translator = createTranslator({}, { formatter: customFormatter })
@@ -88,6 +94,34 @@ import { Translator } from "@corets/translator"
 const translator = new Translator({}, { language: "en" })
 ```
 
+## `createTranslatorAccessor`
+
+Create a statically typed facade powered by the [@corets/accessor](https://corets.github.io/accessor) package. This allows you to access translations in a statically typed manner, no need to use string based translation keys anymore - missing translations will lead to a compilation error!
+
+```ts
+import { createTranslator, createTranslatorAccessor } from "@corets/translator"
+
+const translations = {
+  en: { some: { nested: "value", another: "Hello {greeting}"} },
+  de: { some: { nested: "other"} },
+}
+
+const translator = createTranslator(translations, { language: "en" })
+
+// pass in a translations object that should be used as source of truth,
+// usually this is the default language
+const locales = createTranslatorAccessor(translator, translations.en)
+
+// returns "value"
+locales.some.nested.get()
+// returns "Hello World"
+locales.some.another.get({ replace: { greeting: "World" } })
+// returns "other"
+locales.some.nested.get({ language: "de" })
+```
+
+**Note:** Check out the accessor [docs](https://corets.github.io/accessor) to read more about it's API and features.
+
 ## `Translator.config`
 
 Configure translator:
@@ -102,8 +136,8 @@ translator.config({
   language: "en",
   // fallback to another language if the translation key is missing
   fallbackLanguage: "de",
-  // should translations be templatized? (default: true)
-  templatize: true,
+  // should translations be interpolated? (default: true)
+  interpolate: true,
   // custom replacements formatter
   formatter,
   // custom message interpolator
@@ -250,16 +284,16 @@ Retrieve translation with another fallback language:
 translator.get("key", { fallbackLanguage: "de" })
 ```
 
-Retrieve translation without templatizing it:
+Retrieve translation without interpolating it:
 
 ```ts
-translator.get("key", { templatize: false })
+translator.get("key", { interpolate: false })
 ```
 
 Retrieve a translation and interpolate some values, using array syntax:
 
 ```ts
-// given translation at "key" is "Did you know, $1 and $2 are colors?"
+// given translation at "key" is "Did you know, {{1}} and {{2}} are colors?"
 translator.get("key", ["red", "blue"])
 // you'll get "Did you know, red and blue are colors?"
 ```
@@ -267,7 +301,7 @@ translator.get("key", ["red", "blue"])
 Retrieve a translation and interpolate some values, using object syntax:
 
 ```ts
-// given translation at "key" is "Did you know, $color1 and $color2 are colors?"
+// given translation at "key" is "Did you know, {{color1}} and {{color2}} are colors?"
 translator.get("key", { color1: "red", color2: "blue" })
 // you'll get "Did you know, red and blue are colors?"
 ```
