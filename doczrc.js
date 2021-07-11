@@ -25,6 +25,7 @@ export default {
     "List",
 
     "Use Async",
+    "Use Stream",
     "Use Action",
     "Use Query",
     "Use Debounce",

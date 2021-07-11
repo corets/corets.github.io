@@ -521,16 +521,16 @@ Logically connects multiple schemas, or a custom validation function to the sche
 
 Attaches a custom sanitizer function to the schema. Have a look at [custom sanitizers](#custom-sanitizers) for more details.
 
-## `shape`
+## `schema`
 
-This schema is different from the others since it does not provide any validation nor sanitization methods itself. It is a convenient method to define a new schema starting with the default value. Use it as an entry point for any other kind of schema.
+This factory is different from the other since it does not provide any validation nor sanitization methods itself. It is a convenient method to define a new schema starting with the default value. Use it as an entry point for any other kind of schema.
 
 Example of a schema where we start by defining the default value first:
 
 ```ts
-import { shape } from "@corets/schema"
+import { schema } from "@corets/schema"
 
-const schema = shape("foo").string()
+const stringSchema = schema("foo").string()
 ```
 
 The example above is equivalent to this:
@@ -543,74 +543,74 @@ const schema = string().toDefault("foo")
 
 **Note:** Defining a default value is totally optional, but might be very useful, since you can use the [`Schema.sanitize`](#schemasanitize) to prefill a value with some default data - think *forms*.
 
-## `shape.string`
+## `schema.string`
 
 Create a new [`string`](#string) schema starting with the default value:
 
 ```ts
-import { shape } from "@corets/schema"
+import { schema } from "@corets/schema"
 
-shape("foo").string()
+schema("foo").string()
 ```
 
-## `shape.number`
+## `schema.number`
 
 Create a new [`number`](#number) schema starting with the default value:
 
 ```ts
-import { shape } from "@corets/schema"
+import { schema } from "@corets/schema"
 
-shape("foo").number()
+schema("foo").number()
 ```
 
-## `shape.boolean`
+## `schema.boolean`
 
 Create a new [`boolean`](#boolean) schema starting with the default value:
 
 ```ts
-import { shape } from "@corets/schema"
+import { schema } from "@corets/schema"
 
-shape("foo").boolean()
+schema("foo").boolean()
 ```
 
-## `shape.date`
+## `schema.date`
 
 Create a new [`date`](#date) schema starting with the default value:
 
 ```ts
-import { shape } from "@corets/schema"
+import { schema } from "@corets/schema"
 
-shape("foo").date()
+schema("foo").date()
 ```
 
-## `shape.array`
+## `schema.array`
 
 Create a new [`array`](#array) schema starting with the default value:
 
 ```ts
-import { shape } from "@corets/schema"
+import { schema } from "@corets/schema"
 
-shape("foo").array()
+schema("foo").array()
 ```
 
-## `shape.object`
+## `schema.object`
 
 Create a new [`object`](#object) schema starting with the default value:
 
 ```ts
-import { shape } from "@corets/schema"
+import { schema } from "@corets/schema"
 
-shape("foo").object()
+schema("foo").object()
 ```
 
-## `shape.mixed`
+## `schema.mixed`
 
 Create a new [`mixed`](#mixed) schema starting with the default value:
 
 ```ts
-import { shape } from "@corets/schema"
+import { schema } from "@corets/schema"
 
-shape("foo").mixed()
+schema("foo").mixed()
 ```
 
 ## `string`

@@ -48,7 +48,7 @@ const run = async (argv) => {
 
   debug && console.log(`Found packages: \n${ packageNames.map(name => `    ${ name }`).join("\n") }`)
 
-  const additionalDependencies = ["lodash", "lodash-es"]
+  const additionalDependencies = ["lodash", "lodash-es", "enzyme"]
 
   const packagesWithDeps = packages.map(info => {
     const allDependencies = [...packageNames, ...additionalDependencies]

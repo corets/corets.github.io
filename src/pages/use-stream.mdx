@@ -1,0 +1,48 @@
+---
+name: Use Stream
+route: /use-stream
+repository: use-stream
+---
+
+# Use Stream
+
+This package is built on top of [@corets/use-async](/use-async). It adds support for repeating async operations - streams. Since `useAsync` is used under the hood, you'll have access to the same methods as `cancel()`, `refresh()`, etc.
+
+```bash
+yarn add @corets/use-stream
+```
+
+## `useStream`
+
+Create a repeating, async operation.
+
+```tsx
+import React, { useState } from "react"
+import { useStream } from "@corets/use-stream"
+
+const fetchDateTime = async () => new Date().toTimeString()
+
+const Example = () => {
+  const dateStream = useStream(fetchDateTime, 1000)
+  const handleCancel = () => dateStream.cancel()
+  const handleResume = () => dateStream.refresh()
+
+  return (
+    <div>
+      Current date time is: { dateStream.result }
+
+      {dateStream.isLoading && (
+        <div>Loading for the first time</div>
+      )}
+
+      {!dateStream.isLoading && dateStream.isRefreshing && (
+        <div>Refreshing data</div>
+      )}
+
+      <div>
+        {dateStream.isCancelled ? <button onClick={handleResume}>Resume</button> : <button onClick={handleCancel}>Cancel</button>}
+      </div>
+    </div>
+  )
+}
+```
