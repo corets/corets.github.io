@@ -1,36 +1,4 @@
 {
   "private": true,
-  "license": "MIT",
-  "scripts": {
-    "dev": "docz dev",
-    "build": "docz build --host 0.0.0.0",
-    "serve": "docz serve",
-    "format": "prettier --write ."
-  },
-  "repository": {
-    "url": "git@github.com:corets/corets.github.io.git"
-  },
-  "dependencies": {
-    "@corets/use-debounce": "^0.0.1-0",
-    "@emotion/react": "^11.1.4",
-    "@emotion/styled": "^11.0.0",
-    "algoliasearch": "^3.35.1",
-    "dayjs": "^1.10.2",
-    "docz": "^2.3.1",
-    "dotenv": "^8.2.0",
-    "gatsby-plugin-algolia": "^0.5.0",
-    "gatsby-theme-docz": "^2.3.1",
-    "react": "^17.0.1",
-    "react-dom": "^17.0.1",
-    "react-helmet-async": "^1.0.7",
-    "react-instantsearch-dom": "^6.0.0",
-    "styled-components": "^4.4.1",
-    "styled-icons": "^9.0.1"
-  },
-  "devDependencies": {
-    "@types/react": "^16.8.23",
-    "@types/react-dom": "^16.8.4",
-    "@types/styled-components": "^5.1.7",
-    "prettier": "2.2.1"
-  }
+  "license": "MIT"
 }
